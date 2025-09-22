@@ -20,7 +20,7 @@ This writeup is organized as follows:
 - [Submission](#submission) contains instructions on how to submit your homework
 - [Quick Reference](#quick-reference)
 - [Repo Structure](#repo-structure)
-- [Troubleshooting](#troubleshooting) are some common issues and their solutions. You are welcome to ask questions on Canvas as well.
+- [Troubleshooting](#troubleshooting) are some helpful tips. You are welcome to ask questions on Canvas as well.
 
 ## Rules
 Detailed course logistics is at [here](https://docs.google.com/document/d/1mWm_TYYQpD3NpJISlFQGurBIXxWjizEc1zVffIDhiXU/edit?usp=sharing). 
@@ -267,6 +267,7 @@ Also include:
 
 ## Troubleshooting
 
+- If you want to understand the actual variables and inputs to the function during runtime (e.g., what is the size of the tensor) to help your implementation, the best practice is to use [pdb](https://docs.python.org/3/library/pdb.html) to set breakpoints or simply print out the variables.
 - “No pretraining sequences available” — Ensure your `block_size` is not larger than the number of tokens per file and that `tokenized/metadata.json` exists. Delete or pass `--overwrite_tokenized` to rebuild if needed.
 - CUDA OOM — Lower `--micro_batch_size` and/or `--block_size`.
 - Slow tokenization — Use `--tokenized_dir` and reuse caches; only retokenize when text changes.
