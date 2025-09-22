@@ -99,15 +99,15 @@ Learning Rate
 
 As we learned in class, at inference time, for each step we predict the next token. This is achieved by sampling from a probability distribution over all tokens in the vocabulary, and this probability distribution is computed from a softmax function:
 
-$$P(\text{next token} = w_i) = \frac{e^{\mathbf{z}_i}}{\sum_{j=1}^{V} e^{\mathbf{z}_j}}$$
+$$P(\text{next token} = w_i) = \frac{e^{z_i}}{\sum_{j=1}^{V} e^{z_j}}$$
 
 where:
-- $\mathbf{z}_i$ is called the logit for token $i$
+- $z_i$ is called the logit for token $i$
 - $V$ is the vocabulary size
 
 In practice, however, we can add a temperature parameter $T$ to the softmax function to control the randomness of the sampling:
 
-$$P(\text{next token} = w_i) = \frac{e^{\mathbf{z}_i/T}}{\sum_{j=1}^{V} e^{\mathbf{z}_j/T}}$$
+$$P(\text{next token} = w_i) = \frac{e^{z_i/T}}{\sum_{j=1}^{V} e^{z_j/T}}$$
 
 When $T<1$, then the distribution becomes sharper, and sampling is more deterministic and less diverse. When $T>1$, then the distribution becomes more uniform, and sampling is more random and more diverse. You can think that when $T\rightarrow0$, then the distribution becomes a one-hot distribution and the model will always produce the most likely token, and when $T\rightarrow\infty$, then the distribution becomes a uniform distribution.
 
