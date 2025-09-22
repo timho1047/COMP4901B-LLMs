@@ -232,7 +232,7 @@ Install the running env using
 
 ## Submission
 
-Submit a zip of the codebase and a PDF report to Canvas. Your PDF should include your full name, student ID, and your UST email. For the contents:
+Submit a zip of the codebase (only the `assignment1` directory) and a PDF report to Canvas. Your PDF should include your full name, student ID, and your UST email. For the contents:
 - Part 1: WARC filtering and topic deduplication
   - Command used.
   - Number of records processed and passed; number after deduplication.
