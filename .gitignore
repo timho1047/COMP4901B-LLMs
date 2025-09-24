@@ -6,7 +6,6 @@ __pycache__
 fineweb-edu.parquet
 *.pt
 
-*babylm*
 llama_training/babylm/*
 test/
 
