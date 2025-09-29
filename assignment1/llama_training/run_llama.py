@@ -172,7 +172,7 @@ def preprocess_pretraining_corpus(data_path: str, tokenizer: Tokenizer, tokenize
 	print(f"Wrote pretraining metadata to {metadata_path}")
 	return output_dir, metadata
 
-def evaluate_pretraining(dataloader, model, device, marker="val"):
+def evaluate_pretraining(dataloader, model, device, marker="val", pad_token_id=None):
 	model.eval()
 	total_loss = 0.0
 	total_tokens = 0
