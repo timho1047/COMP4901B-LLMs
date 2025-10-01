@@ -1,7 +1,11 @@
+.venv
+
 data.wat
 data.warc
 data.wet
 __pycache__
+.DS_Store
+.env
 
 fineweb-edu.parquet
 *.pt
@@ -13,8 +17,11 @@ train_100M/
 
 babylm_train.zip
 babylm_test.zip
+babylm_dev.zip
 *.pt
 llama_training/test
 llama_training/dev
 wandb
 checkpoints
+assignment1/llama_training/dev
+assignment1/data_preprocess/cleaned_test.txt

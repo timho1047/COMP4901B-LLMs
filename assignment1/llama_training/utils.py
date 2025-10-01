@@ -17,6 +17,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch import Tensor
+from dotenv import load_dotenv
+
+load_dotenv()
 
 try:
   import wandb  # type: ignore

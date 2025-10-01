@@ -1,11 +1,14 @@
 import argparse
 import re
+from numpy.ma import masked
 import requests
 import json
 from utils import  read_warc_file, read_wet_file
 from datasets import load_dataset
 from typing import Set, Dict
 import string
+from bs4 import BeautifulSoup
+
 
 def retrieve_bad_words() -> set[str]:
     """Helper function - that reads a list of bad words from a file and returns them as a set.
@@ -25,7 +28,8 @@ def html_to_text(html) -> str:
     Returns:
         str: Plain text extracted from HTML.
     """
-    pass 
+    soup = BeautifulSoup(html, 'html.parser')
+    return soup.get_text()
 
 def replace_pii(text: str) -> str:
     """Masks personally identifiable information (PII) from text with the specified masking formats.
@@ -35,7 +39,10 @@ def replace_pii(text: str) -> str:
         str: Text with PII obfuscated.
     """
     # Replace US social security numbers (XXX-XX-XXXX format)
-    pass 
+    PII_PATTERN, PII_MASK = r'\b\d{3}-\d{2}-\d{4}\b', "XXX-XX-XXXX"
+    masked_text = re.sub(PII_PATTERN, PII_MASK, text)
+    
+    return masked_text
     
 
 def clean_text(text: str) -> str:
@@ -45,7 +52,25 @@ def clean_text(text: str) -> str:
     Returns:
         str: cleaned document
     """
-    pass
+    
+    ALNUM_RATIO_THRESHOLD = 0.5
+    WORD_COUNT_THRESHOLD = 2
+    
+    cleaned = []
+    for para in re.split(r"\n\s*\n", text):
+        para = re.sub(r'\s+', ' ', para).strip() # remove extra whitespace
+        if len(para.split()) < WORD_COUNT_THRESHOLD:
+            continue # remove paragraphs that have too few words
+
+        alnum_ratio = sum(c.isalnum() for c in para) / len(para)
+        if alnum_ratio < ALNUM_RATIO_THRESHOLD: 
+            continue # remove paragraphs that are mostly non-alphanumeric
+        
+        if re.search(r"(.)\1{5,}", para):
+            continue # remove paragraphs that have too many repeated characters in one word
+        
+        cleaned.append(para)
+    return "\n".join(cleaned)
 
 
 def heuristic_quality_filter(text: str) -> bool:
@@ -55,7 +80,10 @@ def heuristic_quality_filter(text: str) -> bool:
     Returns:
         bool: returns True if the document passes the filters, False otherwise.
     """
-    pass 
+    BAD_WORD_COUNT_THRESHOLD = 1
+    bad_words = retrieve_bad_words()
+    bad_word_count = sum(1 for word in text.split() if word.lower() in bad_words)
+    return bad_word_count < BAD_WORD_COUNT_THRESHOLD
 
 
 def is_english_text(text: str) -> bool:
@@ -65,7 +93,11 @@ def is_english_text(text: str) -> bool:
     Returns:
         bool: True if text is primarily English, False otherwise
     """
-    pass
+    ENGLISH_CHAR_RATIO_THRESHOLD = 0.999
+    all_alphas = [c for c in text if c.isalpha()] # only consider alphabetic characters
+    english_alphas = [c for c in all_alphas if re.match(r'[a-zA-Z]', c) is not None] # only consider English alphabetic characters
+    english_ratio = len(english_alphas) / len(all_alphas)
+    return english_ratio > ENGLISH_CHAR_RATIO_THRESHOLD
     
 
 def deduplicate_texts(texts: list[str]) -> list[str]:
@@ -75,7 +107,21 @@ def deduplicate_texts(texts: list[str]) -> list[str]:
     Returns:
         list[str]: Deduplicated list of texts. Implemented a simple Jaccard similarity based deduplication.
     """
-    pass
+    SIMILARITY_THRESHOLD = 0.43
+    
+    def jaccard_similarity(set1, set2):
+        return len(set1.intersection(set2)) / len(set1.union(set2))
+    
+    text_set_pairs = [(text, set(text.lower().split())) for text in texts] # tokenize by words
+    deduplicated = []
+    for text, text_set in text_set_pairs:
+        for _, unique_text_set in deduplicated:
+            sim = jaccard_similarity(text_set, unique_text_set)
+            if sim > SIMILARITY_THRESHOLD:
+                break
+        else:
+            deduplicated.append((text, text_set)) # keep the original text and its set
+    return [text for text, _ in deduplicated]
 
 
 if __name__ == '__main__' :

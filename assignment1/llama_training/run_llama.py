@@ -21,195 +21,210 @@ from llama import Llama, load_pretrained
 from optimizer import AdamW
 from tokenizer import Tokenizer
 from utils import (
-	finish_wandb,
-	get_resume_checkpoint_path,
-	init_wandb,
-	maybe_resume_from_checkpoint,
-	save_model,
+    finish_wandb,
+    get_resume_checkpoint_path,
+    init_wandb,
+    maybe_resume_from_checkpoint,
+    save_model,
 )
 
 
 TQDM_DISABLE = False
 # fix the random seed
 def seed_everything(seed=11711):
-	random.seed(seed)
-	np.random.seed(seed)
-	torch.manual_seed(seed)
-	torch.cuda.manual_seed(seed)
-	torch.cuda.manual_seed_all(seed)
-	torch.backends.cudnn.benchmark = False
-	torch.backends.cudnn.deterministic = True
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.mps.manual_seed(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
 
 
 class WarmupLearningRateScheduler:
-	"""Linear warmup scheduler that falls back to a constant learning rate."""
+    """Linear warmup scheduler that falls back to a constant learning rate."""
 
-	def __init__(self, base_lr: float, warmup_steps: int):
-		self.base_lr = base_lr
-		self.warmup_steps = max(0, warmup_steps)
+    def __init__(self, base_lr: float, warmup_steps: int):
+        self.base_lr = base_lr
+        self.warmup_steps = max(0, warmup_steps)
 
-	def lr_at_step(self, step: int) -> float:
-		#TODO
-		# ====================== Implement lr_at_step here ======================
-		# Implement a linear warmup learning rate scheduler.
-		#
-		# Args:
-		#     step (int): Current training step (0-indexed)
-		#
-		# Returns:
-		#     float: Learning rate for the given step
-		pass
-		# ====================== Implement lr_at_step here ======================
+    def lr_at_step(self, step: int) -> float:
+        #TODO
+        # ====================== Implement lr_at_step here ======================
+        # Implement a linear warmup learning rate scheduler.
+        #
+        # Args:
+        #     step (int): Current training step (0-indexed)
+        #
+        # Returns:
+        #     float: Learning rate for the given step
+        if step <=self.warmup_steps:
+            return self.base_lr * step / self.warmup_steps
+        else:
+            return self.base_lr
+        # ====================== Implement lr_at_step here ======================
 
-	def __call__(self, step: int) -> float:
-		return self.lr_at_step(step)
+    def __call__(self, step: int) -> float:
+        return self.lr_at_step(step)
 
 class PretrainingSequenceDataset(Dataset):
-	def __init__(self, data_dir: Path, metadata: dict, block_size: int):
-		self.data_dir = data_dir
-		self.block_size = block_size
-		dtype = metadata.get('dtype', 'uint16')
-		if dtype != 'uint16':
-			raise ValueError(f"Unsupported dtype {dtype} in metadata")
-		self.dtype = np.uint16
-		self.entries = []
-		self.cumulative = []
-		total_sequences = 0
-		for file_info in metadata.get('files', []):
-			token_file = data_dir / file_info['token_file']
-			token_count = int(file_info['token_count'])
-			if not token_file.exists() or token_count < self.block_size:
-				continue
-			memmap = np.memmap(token_file, dtype=self.dtype, mode='r')
-			num_seq = token_count // self.block_size
-			if num_seq <= 0:
-				continue
-			usable_tokens = num_seq * self.block_size
-			self.entries.append({
-				'memmap': memmap,
-				'start': 0,
-				'end': usable_tokens,
-				'token_file': token_file,
-			})
-			total_sequences += num_seq
-			self.cumulative.append(total_sequences)
-		self.total_sequences = total_sequences
-		if self.total_sequences == 0:
-			raise ValueError("No pretraining sequences available. Ensure tokenized data matches block_size.")
+    def __init__(self, data_dir: Path, metadata: dict, block_size: int):
+        self.data_dir = data_dir
+        self.block_size = block_size
+        dtype = metadata.get('dtype', 'uint16')
+        if dtype != 'uint16':
+            raise ValueError(f"Unsupported dtype {dtype} in metadata")
+        self.dtype = np.uint16
+        self.entries = []
+        self.cumulative = []
+        total_sequences = 0
+        for file_info in metadata.get('files', []):
+            token_file = data_dir / file_info['token_file']
+            token_count = int(file_info['token_count'])
+            if not token_file.exists() or token_count < self.block_size:
+                continue
+            memmap = np.memmap(token_file, dtype=self.dtype, mode='r')
+            num_seq = token_count // self.block_size
+            if num_seq <= 0:
+                continue
+            usable_tokens = num_seq * self.block_size
+            self.entries.append({
+                'memmap': memmap,
+                'start': 0,
+                'end': usable_tokens,
+                'token_file': token_file,
+            })
+            total_sequences += num_seq
+            self.cumulative.append(total_sequences)
+        self.total_sequences = total_sequences
+        if self.total_sequences == 0:
+            raise ValueError("No pretraining sequences available. Ensure tokenized data matches block_size.")
 
-	def __len__(self):
-		return self.total_sequences
+    def __len__(self):
+        return self.total_sequences
 
-	def __getitem__(self, idx):
-		if idx < 0 or idx >= self.total_sequences:
-			raise IndexError(idx)
-		file_idx = bisect_right(self.cumulative, idx)
-		prev = 0 if file_idx == 0 else self.cumulative[file_idx - 1]
-		seq_idx = idx if file_idx == 0 else idx - prev
-		entry = self.entries[file_idx]
-		start_offset = entry['start'] + seq_idx * self.block_size
-		end_offset = start_offset + self.block_size
-		seq = entry['memmap'][start_offset:end_offset]
-		# ensure we have the expected length; fallback to last block if needed
-		if seq.shape[0] != self.block_size:
-			offset = entry['end'] - self.block_size
-			seq = entry['memmap'][offset:offset + self.block_size]
-		return torch.tensor(np.array(seq, dtype=np.int64), dtype=torch.long)
+    def __getitem__(self, idx):
+        if idx < 0 or idx >= self.total_sequences:
+            raise IndexError(idx)
+        file_idx = bisect_right(self.cumulative, idx)
+        prev = 0 if file_idx == 0 else self.cumulative[file_idx - 1]
+        seq_idx = idx if file_idx == 0 else idx - prev
+        entry = self.entries[file_idx]
+        start_offset = entry['start'] + seq_idx * self.block_size
+        end_offset = start_offset + self.block_size
+        seq = entry['memmap'][start_offset:end_offset]
+        # ensure we have the expected length; fallback to last block if needed
+        if seq.shape[0] != self.block_size:
+            offset = entry['end'] - self.block_size
+            seq = entry['memmap'][offset:offset + self.block_size]
+        return torch.tensor(np.array(seq, dtype=np.int64), dtype=torch.long)
 
-	def collate_fn(self, batch):
-		token_ids = torch.stack(batch)
-		labels = torch.zeros(token_ids.shape[0], dtype=torch.long)
-		sents = ['' for _ in batch]
-		return {'token_ids': token_ids, 'labels': labels, 'sents': sents}
+    def collate_fn(self, batch):
+        token_ids = torch.stack(batch)
+        labels = torch.zeros(token_ids.shape[0], dtype=torch.long)
+        sents = ['' for _ in batch]
+        return {'token_ids': token_ids, 'labels': labels, 'sents': sents}
 
 
 def tokenize_text_file(input_path: Path, output_path: Path, tokenizer: Tokenizer) -> int:
-	token_buffer = array('H')
-	with open(input_path, 'r', encoding='utf-8') as fp:
-		for line in fp:
-			text = line.strip()
-			if not text:
-				continue
-			tokens = tokenizer.encode(text, bos=True, eos=True)
-			token_buffer.extend(tokens)
-	with open(output_path, 'wb') as out:
-		token_buffer.tofile(out)
-	token_count = len(token_buffer)
-	print(f"Tokenized {input_path} -> {output_path} ({token_count} tokens)")
-	return token_count
+    token_buffer = array('H')
+    with open(input_path, 'r', encoding='utf-8') as fp:
+        for line in fp:
+            text = line.strip()
+            if not text:
+                continue
+            tokens = tokenizer.encode(text, bos=True, eos=True)
+            token_buffer.extend(tokens)
+    with open(output_path, 'wb') as out:
+        token_buffer.tofile(out)
+    token_count = len(token_buffer)
+    print(f"Tokenized {input_path} -> {output_path} ({token_count} tokens)")
+    return token_count
 
 
 def preprocess_pretraining_corpus(data_path: str, tokenizer: Tokenizer, tokenized_dir: Optional[str], overwrite: bool = False):
-	data_dir = Path(data_path)
-	assert data_dir.is_dir(), f"Expected directory for pretraining data, got {data_path}"
-	output_dir = Path(tokenized_dir) if tokenized_dir is not None else data_dir / 'tokenized'
-	output_dir.mkdir(parents=True, exist_ok=True)
-	metadata = {'dtype': 'uint16', 'files': []}
-	patterns = ('*.train', '*.val', '*.test', '*.txt', '*.dev')
-	input_files = []
-	for pattern in patterns:
-		input_files.extend(data_dir.glob(pattern))
-	seen = set()
-	for input_file in sorted(input_files):
-		if input_file.name in seen or input_file.is_dir():
-			continue
-		seen.add(input_file.name)
-		output_file = output_dir / f"{input_file.stem}.bin"
-		if overwrite or not output_file.exists():
-			token_count = tokenize_text_file(input_file, output_file, tokenizer)
-		else:
-			token_count = output_file.stat().st_size // np.dtype(np.uint16).itemsize
-		metadata['files'].append({
-			'source': str(input_file),
-			'token_file': output_file.name,
-			'token_count': int(token_count)
-		})
-	if not metadata['files']:
-		raise ValueError(f"No supported text files found in {data_path}. Expected extensions: {', '.join(patterns)}")
-	metadata_path = output_dir / 'metadata.json'
-	with open(metadata_path, 'w') as mf:
-		json.dump(metadata, mf, indent=2)
-	print(f"Wrote pretraining metadata to {metadata_path}")
-	return output_dir, metadata
+    data_dir = Path(data_path)
+    assert data_dir.is_dir(), f"Expected directory for pretraining data, got {data_path}"
+    output_dir = Path(tokenized_dir) if tokenized_dir is not None else data_dir / 'tokenized'
+    output_dir.mkdir(parents=True, exist_ok=True)
+    metadata = {'dtype': 'uint16', 'files': []}
+    patterns = ('*.train', '*.val', '*.test', '*.txt', '*.dev')
+    input_files = []
+    for pattern in patterns:
+        input_files.extend(data_dir.glob(pattern))
+    seen = set()
+    for input_file in sorted(input_files):
+        if input_file.name in seen or input_file.is_dir():
+            continue
+        seen.add(input_file.name)
+        output_file = output_dir / f"{input_file.stem}.bin"
+        if overwrite or not output_file.exists():
+            token_count = tokenize_text_file(input_file, output_file, tokenizer)
+        else:
+            token_count = output_file.stat().st_size // np.dtype(np.uint16).itemsize
+        metadata['files'].append({
+            'source': str(input_file),
+            'token_file': output_file.name,
+            'token_count': int(token_count)
+        })
+    if not metadata['files']:
+        raise ValueError(f"No supported text files found in {data_path}. Expected extensions: {', '.join(patterns)}")
+    metadata_path = output_dir / 'metadata.json'
+    with open(metadata_path, 'w') as mf:
+        json.dump(metadata, mf, indent=2)
+    print(f"Wrote pretraining metadata to {metadata_path}")
+    return output_dir, metadata
 
 def evaluate_pretraining(dataloader, model, device, marker="val", pad_token_id=None):
-	model.eval()
-	total_loss = 0.0
-	total_tokens = 0
-	with torch.no_grad():
-		for batch in tqdm(dataloader, desc=marker, disable=TQDM_DISABLE):
-			token_ids = batch['token_ids'].to(device)
-			logits = model.llama(token_ids, targets=token_ids)[0]
-			logits = F.log_softmax(logits, dim=-1)
-			shift_logits = logits[..., :-1, :].contiguous()
-			shift_labels = token_ids[..., 1:].contiguous()
-			if shift_logits.size(1) == 0:
-				continue
-			logits_flat = shift_logits.view(-1, shift_logits.size(-1))
-			labels_flat = shift_labels.view(-1)
-			if pad_token_id is not None:
-				valid_mask = labels_flat.ne(pad_token_id)
-				if not torch.any(valid_mask):
-					continue
-				logits_flat = logits_flat[valid_mask]
-				labels_flat = labels_flat[valid_mask]
-			batch_token_count = labels_flat.numel()
-			if batch_token_count == 0:
-				continue
-			batch_loss = F.nll_loss(logits_flat, labels_flat, reduction='sum')
-			total_loss += batch_loss.item()
-			total_tokens += batch_token_count
-	if total_tokens == 0:
-		return float('inf'), float('inf')
-	avg_loss = total_loss / total_tokens
-	perplexity = math.exp(avg_loss)
-	return avg_loss, perplexity
+    model.eval()
+    total_loss = 0.0
+    total_tokens = 0
+    with torch.no_grad():
+        for batch in tqdm(dataloader, desc=marker, disable=TQDM_DISABLE):
+            token_ids = batch['token_ids'].to(device)
+            logits = model.llama(token_ids, targets=token_ids)[0]
+            logits = F.log_softmax(logits, dim=-1)
+            shift_logits = logits[..., :-1, :].contiguous()
+            shift_labels = token_ids[..., 1:].contiguous()
+            if shift_logits.size(1) == 0:
+                continue
+            logits_flat = shift_logits.view(-1, shift_logits.size(-1))
+            labels_flat = shift_labels.view(-1)
+            if pad_token_id is not None:
+                valid_mask = labels_flat.ne(pad_token_id)
+                if not torch.any(valid_mask):
+                    continue
+                logits_flat = logits_flat[valid_mask]
+                labels_flat = labels_flat[valid_mask]
+            batch_token_count = labels_flat.numel()
+            if batch_token_count == 0:
+                continue
+            batch_loss = F.nll_loss(logits_flat, labels_flat, reduction='sum')
+            total_loss += batch_loss.item()
+            total_tokens += batch_token_count
+    if total_tokens == 0:
+        return float('inf'), float('inf')
+    avg_loss = total_loss / total_tokens
+    perplexity = math.exp(avg_loss)
+    return avg_loss, perplexity
 
+
+def get_device():
+    """Auto select cuda, mps, or cpu."""
+    
+    if torch.cuda.is_available():
+        return torch.device('cuda')
+    elif torch.backends.mps.is_available():
+        return torch.device('mps')
+    else:
+        return torch.device('cpu')
 
 def train(args):
     if args.option != "pretrain":
         raise ValueError("train() only supports the 'pretrain' option.")
-    device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+    # device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+    device = get_device()
 
     tokenizer = Tokenizer(None)
     if not args.data_path or not os.path.isdir(args.data_path):
@@ -543,45 +558,47 @@ def train(args):
             wandb_run.log({'test/token_loss': test_loss, 'test/perplexity': test_ppl}, step=global_step)
 
 def generate_sentence(args, prefix, outfile, max_new_tokens = 75, temperature = 0.0, top_k = 20):
-	with torch.no_grad():
-		device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
-		ctx = torch.amp.autocast(device_type="cuda", dtype=torch.float32) if args.use_gpu else nullcontext()
-		llama = load_pretrained(args.pretrained_model_path)
-		llama = llama.to(device)
-		print(f"load model from {args.pretrained_model_path}")
-		enc = Tokenizer(args.max_sentence_len)
+    with torch.no_grad():
+        # device = torch.device('cuda') if args.use_gpu else torch.device('cpu')
+        device = get_device()
+        # ctx = torch.amp.autocast(device_type="cuda", dtype=torch.float32) if args.use_gpu else nullcontext()
+        ctx = nullcontext() if device.type == 'cpu' else torch.amp.autocast(device_type=device.type, dtype=torch.float32)
+        llama = load_pretrained(args.pretrained_model_path)
+        llama = llama.to(device)
+        print(f"load model from {args.pretrained_model_path}")
+        enc = Tokenizer(args.max_sentence_len)
 
-		start_ids = enc.encode(prefix, bos=True, eos=False)
-		x = (torch.tensor(start_ids, dtype=torch.long, device=device)[None, ...])
+        start_ids = enc.encode(prefix, bos=True, eos=False)
+        x = (torch.tensor(start_ids, dtype=torch.long, device=device)[None, ...])
 
-		# run generation
-		with torch.no_grad():
-			with ctx:
-				y = llama.generate(x, max_new_tokens, temperature=temperature, top_k=top_k)
-				sentence = enc.decode(y[0].tolist())
-				print(f"Temperature is {temperature}")
-				print(sentence)
-				print('---------------')
-				writer = open(outfile, 'w')
-				writer.write(sentence)
-				print(f"Wrote generated sentence to {outfile}.")
-				writer.close()
+        # run generation
+        with torch.no_grad():
+            with ctx:
+                y = llama.generate(x, max_new_tokens, temperature=temperature, top_k=top_k)
+                sentence = enc.decode(y[0].tolist())
+                print(f"Temperature is {temperature}")
+                print(sentence)
+                print('---------------')
+                writer = open(outfile, 'w')
+                writer.write(sentence)
+                print(f"Wrote generated sentence to {outfile}.")
+                writer.close()
 
 
 
 if __name__ == "__main__":
-	args = parse_args()
-	run_name = args.run_name or "run"
-	args.filepath = f"{run_name}-{args.option}-{args.epochs}-{args.lr}.pt"
-	seed_everything(args.seed)
-	try:
-		if args.option == "generate":
-			prefix = "White Bird is a 2023 American war drama movie starring"
-			generate_sentence(args, prefix, args.generated_sentence_low_temp_out, max_new_tokens=75, temperature=0.0, top_k = 20)
-			generate_sentence(args, prefix, args.generated_sentence_high_temp_out, max_new_tokens=75, temperature=0.5, top_k = 50)
-		elif args.option == "pretrain":
-			train(args)
-		else:
-			raise ValueError(f"Invalid option: {args.option}")
-	finally:
-		finish_wandb()
+    args = parse_args()
+    run_name = args.run_name or "run"
+    args.filepath = f"{run_name}-{args.option}-{args.epochs}-{args.lr}.pt"
+    seed_everything(args.seed)
+    try:
+        if args.option == "generate":
+            prefix = "White Bird is a 2023 American war drama movie starring"
+            generate_sentence(args, prefix, args.generated_sentence_low_temp_out, max_new_tokens=75, temperature=0.0, top_k = 20)
+            generate_sentence(args, prefix, args.generated_sentence_high_temp_out, max_new_tokens=75, temperature=0.5, top_k = 50)
+        elif args.option == "pretrain":
+            train(args)
+        else:
+            raise ValueError(f"Invalid option: {args.option}")
+    finally:
+        finish_wandb()

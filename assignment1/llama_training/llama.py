@@ -100,7 +100,16 @@ class Attention(nn.Module):
         
         #TODO
         # ====================== Implement compute_query_key_value_scores here ======================
-        pass
+        B, H, L, D = query.shape
+        
+        qk = query.reshape(B*H, L, D) @ key.transpose(-2, -1).reshape(B*H, D, L) # (B*H, L, L)
+        qk = qk / math.sqrt(D)
+        mask = torch.triu(torch.ones(L, L) * float('-inf'), diagonal=1).to(query.device) # upper triangular matrix with -inf
+        qk = F.softmax(qk + mask, dim=-1)
+        out = self.attn_dropout(qk) @ value.reshape(B*H, L, D) # (B*H, L, D)
+        
+        return out.reshape(B, H, L, D)
+        
         # ====================== Implement compute_query_key_value_scores here ======================
 
 

@@ -40,10 +40,10 @@ Honor code violation will be directly cause failing the course.
 - The script writes CC files into `data_preprocess/` and BabyLM into `llama_training/`.
 
 ### 1. (15 points) Part 1 — Data preprocessing (data_preprocess/) 
-(10 pts) 2.1. Implement the TODOs in `data_preprocess/homework.py` (you may refer to the dataset in 2.2 below to understand what the data to be preprocessed looks like):
+(10 pts) 1.1. Implement the TODOs in `data_preprocess/homework.py` (you may refer to the dataset in 2.2 below to understand what the data to be preprocessed looks like):
   - `html_to_text`, `replace_pii`, `clean_text`, `heuristic_quality_filter`, `is_english_text`, `deduplicate_texts`.
   
-(5 pts) 2.2. From `data_preprocess/`, run the pipeline to filter the WARC dump and deduplicate the topic dataset:
+(5 pts) 1.2. From `data_preprocess/`, run the pipeline to filter the WARC dump and deduplicate the topic dataset:
   - `cd data_preprocess`
   - `python homework.py --fname data.warc --output cleaned_test.txt --dfname topic_dataset.json`
 - Report (paste into the PDF):
