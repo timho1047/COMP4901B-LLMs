@@ -49,6 +49,7 @@ Honor code violation will be directly cause failing the course.
 (5 pts) 2.2. From `data_preprocess/`, run the pipeline to filter the WARC dump and deduplicate the topic dataset:
   - `cd data_preprocess`
   - `python homework.py --fname data.warc --output cleaned_test.txt --dfname topic_dataset.json`
+  - Minimum number of records to process: 2000 (adjust `--num_records` accordingly when sampling subsets).
 - Report (paste into the PDF):
   - Number of WARC records processed and the number that pass all filters.
   - Number of topic dataset items after deduplication.
