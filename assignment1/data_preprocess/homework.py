@@ -93,7 +93,7 @@ def is_english_text(text: str) -> bool:
     Returns:
         bool: True if text is primarily English, False otherwise
     """
-    ENGLISH_CHAR_RATIO_THRESHOLD = 0.999
+    ENGLISH_CHAR_RATIO_THRESHOLD = 0.9
     all_alphas = [c for c in text if c.isalpha()] # only consider alphabetic characters
     english_alphas = [c for c in all_alphas if re.match(r'[a-zA-Z]', c) is not None] # only consider English alphabetic characters
     english_ratio = len(english_alphas) / len(all_alphas)
@@ -107,7 +107,7 @@ def deduplicate_texts(texts: list[str]) -> list[str]:
     Returns:
         list[str]: Deduplicated list of texts. Implemented a simple Jaccard similarity based deduplication.
     """
-    SIMILARITY_THRESHOLD = 0.43
+    SIMILARITY_THRESHOLD = 0.4
     
     def jaccard_similarity(set1, set2):
         return len(set1.intersection(set2)) / len(set1.union(set2))

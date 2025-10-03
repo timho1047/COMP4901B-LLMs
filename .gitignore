@@ -25,3 +25,7 @@ wandb
 checkpoints
 assignment1/llama_training/dev
 assignment1/data_preprocess/cleaned_test.txt
+assignment1/llama_training/generated-sentence-temp-*.txt
+
+*.synctex.gz
+.cache

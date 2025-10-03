@@ -290,12 +290,13 @@ class Llama(LlamaPreTrainedModel):
             idx_cond = idx if idx.size(1) <= self.params.max_seq_len else idx[:, -self.params.max_seq_len:]
             # forward the model to get the logits for the index in the sequence
             logits, _ = self(idx_cond)
-            logits_last = logits[:, -1, :]
+            logits_last = logits[:, -1, :] # (B, V)
             if temperature == 0.0:
                 # select the single most likely index
                 #TODO
                 # ====================== Implement greedy sampling here ======================
-                pass
+                # probs = F.softmax(logits_last, dim=-1) # (B, V)
+                idx_next = torch.argmax(logits_last, dim=-1, keepdim=True) # (B, 1)
                 # ====================== Implement greedy sampling here ======================
             else:
                 '''
@@ -309,12 +310,18 @@ class Llama(LlamaPreTrainedModel):
                 if top_k is not None:
                     #TODO
                     # ====================== Implement top-k sampling here ======================
-                    pass
+                    _, topk_indices = logits_work.topk(k=top_k, dim=-1)
+                    row_idx = torch.arange(logits_work.shape[0], device=logits_work.device).unsqueeze(1)
+                    mask = torch.full_like(logits_work, float('-inf'))
+                    mask[row_idx, topk_indices] = 0
+                    logits_work = logits_work + mask
+                    
                     # ====================== Implement top-k sampling here ======================
 
                 #TODO
                 # ====================== Implement temperature sampling here ======================
-                pass
+                probs = F.softmax(logits_work / temperature, dim=-1)
+                idx_next = torch.multinomial(probs, num_samples=1)
                 # ====================== Implement temperature sampling here ======================
 
             # append sampled index to the running sequence and continue
