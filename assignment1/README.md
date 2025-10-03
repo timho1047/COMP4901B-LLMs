@@ -42,7 +42,10 @@ Honor code violation will be directly cause failing the course.
 ### 1. (15 points) Part 1 — Data preprocessing (data_preprocess/) 
 (10 pts) 2.1. Implement the TODOs in `data_preprocess/homework.py` (you may refer to the dataset in 2.2 below to understand what the data to be preprocessed looks like):
   - `html_to_text`, `replace_pii`, `clean_text`, `heuristic_quality_filter`, `is_english_text`, `deduplicate_texts`.
-  
+- `heuristic_quality_filter(text: str) -> bool`: Return `True` only when the document passes all quality gates from the starter code. Specifically, ensure the text contains no entries from `bad_word_list.txt`, includes at least one character from `string.punctuation`, has some non-whitespace content, and that 80% or more of its characters are alphanumeric, punctuation, or whitespace.
+- `remove_pii(text: str) -> str`: Mask clear PII patterns before further filtering. Replace U.S. Social Security numbers of the form `XXX-XX-XXXX` by converting every digit to `X`, and replace any 10-digit phone number prefixed with `+1` by an all-`X` version (preserving the leading `+`). Leave other text untouched.
+- `clean_text(text: str) -> str`: Split the document into paragraphs with `text.split("\n")`, drop paragraphs that contain more than 100 alphanumeric characters with no whitespace between them., and drop paragraphs that do not contain punctuation. Join the surviving paragraphs with newline characters in their original order.
+
 (5 pts) 2.2. From `data_preprocess/`, run the pipeline to filter the WARC dump and deduplicate the topic dataset:
   - `cd data_preprocess`
   - `python homework.py --fname data.warc --output cleaned_test.txt --dfname topic_dataset.json`
