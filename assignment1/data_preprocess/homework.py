@@ -39,10 +39,10 @@ def replace_pii(text: str) -> str:
         str: Text with PII obfuscated.
     """
     # Replace US social security numbers (XXX-XX-XXXX format)
-    PII_PATTERN, PII_MASK = r'\b\d{3}-\d{2}-\d{4}\b', "XXX-XX-XXXX"
-    masked_text = re.sub(PII_PATTERN, PII_MASK, text)
-    
-    return masked_text
+    PATTERN_AND_MASK = [(r'\b\d{3}-\d{2}-\d{4}\b', "XXX-XX-XXXX"), (r'\+1\d{10}', "X" * 11)]
+    for pattern, mask in PATTERN_AND_MASK:
+        text = re.sub(pattern, mask, text)
+    return text
     
 
 def clean_text(text: str) -> str:
@@ -52,22 +52,18 @@ def clean_text(text: str) -> str:
     Returns:
         str: cleaned document
     """
-    
-    ALNUM_RATIO_THRESHOLD = 0.5
-    WORD_COUNT_THRESHOLD = 2
+
+    ALNUM_COUNT_THRESHOLD = 101
     
     cleaned = []
-    for para in re.split(r"\n\s*\n", text):
-        para = re.sub(r'\s+', ' ', para).strip() # remove extra whitespace
-        if len(para.split()) < WORD_COUNT_THRESHOLD:
-            continue # remove paragraphs that have too few words
-
-        alnum_ratio = sum(c.isalnum() for c in para) / len(para)
-        if alnum_ratio < ALNUM_RATIO_THRESHOLD: 
-            continue # remove paragraphs that are mostly non-alphanumeric
+    for para in text.split("\n"):
         
-        if re.search(r"(.)\1{5,}", para):
-            continue # remove paragraphs that have too many repeated characters in one word
+        # Alphanumeric count gate
+        if re.search(rf'\w{{{ALNUM_COUNT_THRESHOLD},}}', para):
+            continue # remove paragraphs that have too many consecutive alphanumeric characters
+        
+        if set(para) & set(string.punctuation) == set():
+            continue # remove paragraphs that have no punctuation
         
         cleaned.append(para)
     return "\n".join(cleaned)
@@ -80,10 +76,30 @@ def heuristic_quality_filter(text: str) -> bool:
     Returns:
         bool: returns True if the document passes the filters, False otherwise.
     """
-    BAD_WORD_COUNT_THRESHOLD = 1
+    ALNUM_RATIO_THRESHOLD = 0.8
+    char_set = set(text)
+    
+    # Bad word gate
     bad_words = retrieve_bad_words()
-    bad_word_count = sum(1 for word in text.split() if word.lower() in bad_words)
-    return bad_word_count < BAD_WORD_COUNT_THRESHOLD
+    if any(word.lower() in bad_words for word in text.split()):
+        return False
+    
+    # Punctuation gate, has at least one punctuation character
+    punctuation = set(string.punctuation)
+    if punctuation & char_set == set():
+        return False
+
+    # Whitespace gate, has non-whitespace characters
+    whitespace = set(string.whitespace)
+    if char_set - (whitespace | punctuation) == set():
+        return False
+    
+    # Alphanumeric gate, has at least 80% alphanumeric, punctuation, or whitespace characters
+    alnum_ratio = sum(c.isalnum() or c in (whitespace | punctuation) for c in text) / len(text)
+    if alnum_ratio < ALNUM_RATIO_THRESHOLD:
+        return False
+    
+    return True
 
 
 def is_english_text(text: str) -> bool:
@@ -93,10 +109,10 @@ def is_english_text(text: str) -> bool:
     Returns:
         bool: True if text is primarily English, False otherwise
     """
-    ENGLISH_CHAR_RATIO_THRESHOLD = 0.9
+    ENGLISH_CHAR_RATIO_THRESHOLD = 0.99
     all_alphas = [c for c in text if c.isalpha()] # only consider alphabetic characters
     english_alphas = [c for c in all_alphas if re.match(r'[a-zA-Z]', c) is not None] # only consider English alphabetic characters
-    english_ratio = len(english_alphas) / len(all_alphas)
+    english_ratio = len(english_alphas) / len(all_alphas) if all_alphas else 0
     return english_ratio > ENGLISH_CHAR_RATIO_THRESHOLD
     
 

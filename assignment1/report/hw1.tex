@@ -57,24 +57,28 @@
 
 For each paragraph in the text, I do the following cleaning steps:
 \begin{itemize}
-    \item if there are more than 1 whitespaces between words, I replace them with a single whitespace
-    \item strip the paragraph of extra whitespace
-    \item remove paragraphs that have too few words (less than 2 words)
-    \item remove paragraphs that are mostly non-alphanumeric, such as ?,/,-, etc. (less than 50\% alphanumeric characters)
-    \item remove paragraphs that have too many repeated characters in one word, such as "aaaaaa", "bbbbbb", etc. (more than 5 consecutive characters)
+    \item if there are at least 101 consecutive alphanumeric characters, I remove the paragraph
+    \item if the paragraph has no punctuation, I remove the paragraph
 \end{itemize}
 
 \subsection{Heuristic Quality Filter Logic}
 
-I count the number of bad words in the text, if there are more than the number of bad words threshold (I use 1 as the threshold), I reject the text.
+I reject the text if:
+
+\begin{itemize}
+    \item there are any bad words in the text
+    \item the text has no punctuation
+    \item the text has no non-whitespace or punctuation characters
+    \item the ratio of alphanumeric, punctuation, or whitespace characters to the total number of characters is less than 0.8
+\end{itemize}
 
 \subsection{English Text Detection Logic}
 
-First, I filter out the alphabetic characters, such as "a", "B", "\begin{CJK}{UTF8}{gbsn}我\end{CJK}", etc., excluding the symbols like "?", "/", "-", etc.
+First, I filter the alphabetic characters, such as "a", "B", "\begin{CJK}{UTF8}{gbsn}我\end{CJK}", etc., excluding the symbols like "?", "/", "-", etc.
 
 Then, from the remaining alphabetic characters, I count the number of English alphabetic characters (i.e. "a-zA-Z").
 
-If the ratio of English alphabetic characters to the total number of alphabetic characters is greater than the English character ratio threshold (I use 0.9 as the threshold), I accept the text.
+If the ratio of English alphabetic characters to the total number of alphabetic characters is greater than the English character ratio threshold (I use 0.99 as the threshold), I accept the text.
 
 \subsection{Results}
 
@@ -82,7 +86,7 @@ Here is the record numbers of WARC records processed and the number that pass al
 
 
 \begin{lstlisting}
-9 passed out of 30 records processed.
+704 passed out of 2000 records processed.
 Cleaned documents saved to: cleaned_test.txt
 121 deduplicated out of 219 records processed.
 \end{lstlisting}
