@@ -4,7 +4,7 @@
 
 
 python run_llama.py \
-  --run_name run6-fix-loss \
+  --run_name run7 \
   --option pretrain \
   --data_path train_100M \
   --block_size  256 \
