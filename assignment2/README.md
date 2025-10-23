@@ -39,6 +39,7 @@ Honor code violation will directly cause failing the course.
 ## Your Tasks
 
 ### 0. Environment Setup
+- **We recommend running the project on a Linux system. Windows and macOS environments are not tested and may not work as expected.**
 - We provide access to 2080 Ti GPUs through the department cluster. You can refer to [this document](school_cluster.md) for detailed usage instructions.
 - Run `bash setup.sh` from the repo root to install all dependencies and download necessary resources.
 - The script installs PyTorch, Transformers, DeepSpeed, and other required packages.
