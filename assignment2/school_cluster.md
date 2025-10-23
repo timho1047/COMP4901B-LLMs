@@ -2,6 +2,10 @@
 
 This guide provides a step-by-step walkthrough for utilizing the department's computing cluster for your coursework.
 
+
+### By default, School Cluster use C shell (csh) not Bash. However, all the setup commands we provided are written for Bash, so before running any setup commands, please switch to Bash by typing `bash`. 
+
+
 ## 1. Accessing the Cluster
 
 The department's cluster consists of a head node and multiple compute nodes. Each compute node has one 2080 Ti GPU. The head node serves as the entry point, while the compute nodes are where you will run your computational tasks. **It's important to remember that the head node's disk is separate from the compute nodes' disks, so you should only use the head node for logging in and managing your jobs, and perform your actual work on the compute nodes.** 
