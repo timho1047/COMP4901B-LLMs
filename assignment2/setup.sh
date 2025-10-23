@@ -1,4 +1,8 @@
-pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu126
+# Modify this command depending on your system's environment.
+# As written, this command assumes you have CUDA on your machine, but
+# refer to https://pytorch.org/get-started/previous-versions/ for the correct
+# command for your system.
+pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu126 
 pip install transformers[torch]==4.57.1
 pip install vllm==0.10.2 
 
