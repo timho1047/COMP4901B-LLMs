@@ -26,6 +26,7 @@ checkpoints
 assignment1/llama_training/dev
 assignment1/data_preprocess/cleaned_test.txt
 assignment1/llama_training/generated-sentence-temp-*.txt
+assignment2/generate_reverse_solutions.py
 
 *.synctex.gz
 .cache
