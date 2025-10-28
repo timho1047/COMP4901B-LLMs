@@ -41,4 +41,4 @@ deepspeed --include localhost:${DEVICES} --master_port 29501  train_hw_parallel.
     --dataloader_num_workers 2 \
     --preprocess_workers 2 \
     --max_rounds 5 \
-    --deepspeed assignment2/ds_configs/zero2_offload.json \
+    --deepspeed ds_configs/zero2_offload.json \
