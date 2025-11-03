@@ -300,10 +300,8 @@ If your initial model does not exceed the baseline, you should tune hyperparamet
 
 **Report (paste into the PDF):**
 - Comparison table showing IFEval metrics before and after SFT:
-  - Prompt-level strict accuracy
-  - Prompt-level loose accuracy
-  - Instruction-level strict accuracy
-  - Instruction-level loose accuracy
+  - strict accuracy
+  - loose accuracy
 - Final strict accuracy of your best model (must be > 22%)
 - Hyperparameter tuning summary:
   - Table of different configurations you tried
