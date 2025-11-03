@@ -30,3 +30,4 @@ assignment2/generate_reverse_solutions.py
 
 *.synctex.gz
 .cache
+.vllm_cache

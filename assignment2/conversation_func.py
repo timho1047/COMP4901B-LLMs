@@ -57,6 +57,7 @@ def conversation_to_features(
             tokenize=True,
             add_generation_prompt=False,
         )
+        
         if isinstance(partial, torch.Tensor):
             partial = partial.tolist()
         prefix_lengths.append(len(partial))
@@ -89,7 +90,13 @@ def conversation_to_features(
         #   - `prefix_lengths[i]` gives the token count up through
         #     `messages[i]`.
         #
-        raise NotImplementedError("Exercise 1: implement the single-turn loss mask.")
+        for i in range(len(messages)):
+            if messages[i]["role"] == "assistant":
+                start = min(prefix_lengths[i-1] if i > 0 else 0, len(full_ids))
+                end = min(prefix_lengths[i], len(full_ids))
+                if start >= end:
+                    break
+                labels[start:end] = full_ids[start:end]
     else:
         # ------------------------------------------------------------------
         # Exercise 2: Multi-turn loss mask
@@ -112,7 +119,13 @@ def conversation_to_features(
         #   - The code that follows assumes `labels` already reflect your
         #     masking decisions.
         #
-        raise NotImplementedError("Exercise 2: extend the loss mask to multi-turn conversations.")
+        for i in range(len(messages)):
+            if messages[i]["role"] == "assistant":
+                start = min(prefix_lengths[i-1] if i > 0 else 0, len(full_ids))
+                end = min(prefix_lengths[i], len(full_ids))
+                if start >= end:
+                    break
+                labels[start:end] = full_ids[start:end]
 
     if len(full_ids) > max_length:
         if truncation == "left":

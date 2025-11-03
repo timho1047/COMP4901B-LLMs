@@ -1,0 +1,298 @@
+\documentclass[11pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{CJKutf8}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+
+% Code listing style
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    tabsize=4
+}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{COMP4901B - Large Language Models}
+\rhead{Assignment 1}
+\cfoot{\thepage}
+\setlength{\parindent}{0pt}
+
+% Title information
+\title{
+    \textbf{COMP4901B: Large Language Models} \\
+    \vspace{0.5em}
+    \Large Assignment 2 Report
+}
+\author{HE, Wenqian \\ Student ID: 20860896}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+\section{Part 1: Single-turn Loss Masking}
+
+\begin{lstlisting}
+$ python conversation_func.py 
+single_turn validation passed. Outputs match the golden answers.
+\end{lstlisting}
+
+I use a for loop to loop through the messages and detect the role. If the role is "assistant", I will get the start and end index of the assistant message from the prefix lengths. Then I will copy the assistant message tokens to the same positions in the labels.
+
+\section{Part 2 — Multi-turn Loss Masking}
+
+\begin{lstlisting}
+$ python conversation_func.py --multi-turn
+multi_turn validation passed. Outputs match the golden answers.
+\end{lstlisting}
+
+I use the same logic as Part 1. To make sure the truncation is handled correctly, I use the min function to get the bounded start and end index of the assistant message. If the start index is greater than or equal to the end index, I will break the loop.
+
+\section{Part 3 — Reverse Loss Masking (Single-turn with Message Reordering)}
+
+\begin{lstlisting}
+$ python reverse_conversation_func.py 
+single_turn validation passed. Outputs match the golden answers.
+\end{lstlisting}
+
+I used the same logic as Part 1. Only modifying the role detection to "user" instead of "assistant".
+\newline
+
+After masking the assistant message, the model will learn to predict the user message, which is usually the question from the user. A real world application scenario is to recommend some follow-up quesitions of the user, such that the user can select to ask without typing the question themselves.
+
+\section{Part 4 — Reverse Loss Masking (Multi-turn)}
+
+\begin{lstlisting}
+$ python reverse_conversation_func.py --multi-turn
+multi_turn validation passed. Outputs match the golden answers.
+\end{lstlisting}
+
+I used the same logic as Part 2. Only modifying the role detection to "user" instead of "assistant".
+\newline
+
+After doing this masking strategy, the model will learn to predict the user message in multi-turn conversations. A real world application scenario is to recommend some follow-up quesitions of the user in a multi-turn conversation, such that the user can select to ask without typing the question themselves.
+
+\section{Part 5 — Cross-Entropy Loss Implementation}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/part5.png}
+    \caption{Loss functions checker}
+\end{figure}
+
+To compute the loss, I first shitf the labels by one position to the left. Then I use the \texttt{IGNORE\_TOKEN\_ID} to remove the masked tokens. Then I compute the flatted log probability $\in \mathbb{R}^{B\times L, V}$ by using the log-softmax function. For a log probability in the $k$-th position and $i$-th vocab, it is computed as:
+
+$$
+\log p_{k,i} = \log \frac{e^{logits_{k,i}}}{\sum_{j=1}^{V} e^{logits_{k,j}}}
+$$
+
+Then I compute the loss by dividing the sum of the negative log probability corresponding to the labels by \texttt{num\_items\_in\_batch}.
+
+
+$$
+\text{loss} = -\frac{1}{N} \sum_{k=1}^{N} \log p_k, \quad\text{where } N \leq B\times L
+$$
+
+\begin{itemize}
+    \item $N$ is the number of valid tokens in the batch (same as \texttt{num\_items\_in\_batch}).
+    \item $B$ is the batch size.
+    \item $L$ is the sequence length.
+    \item $V$ is the vocabulary size.
+\end{itemize}
+
+\texttt{num\_items\_in\_batch} is the number of valid tokens in the whole effective batch (=number of valid labels after masking and label shifting accross all devices and gradient accumulation steps), which is used to normalize the loss. It is necessary because the loss is only computed for the valid tokens, and we want to normalize the loss by the number of valid tokens.
+
+
+\section{Part 6 — Supervised Fine-Tuning}
+
+\subsection{Training Configuration}
+
+\begin{lstlisting}
+GPU: NVIDIA 2080Ti
+Batch size per device: 1
+Gradient accumulation steps: 128
+Effective batch size: 128
+Learning rate: 2e-5
+Epochs: 3
+Total steps: 138
+\end{lstlisting}
+
+\subsection{Training Loss Curve}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/training.png}
+    \caption{Training loss curve and learning rate curve of the fine-tuned model with default hyperparameters}
+\end{figure}
+
+\subsection{Final Checkpoint Path}
+\begin{lstlisting}
+ckpt/HW2
+\end{lstlisting}
+
+\subsection{Role of \texttt{tokenizer.apply\_chat\_template()} in the Training Pipeline}
+
+The role of \texttt{tokenizer.apply\_chat\_template()} in the training pipeline is to format the training data in to conversation format (system message, user message, assistant message) with special tokens, such that the model can learn to respond to to user message according to system message and previous user-assistant conversation history. More specifically, here is an example of the conversation after applying the chat template:
+
+\begin{lstlisting}
+# Before applying the chat template
+
+{"role": "system", "content": "You are a good state predictor."},
+{"role": "user", "content": "What is the capital of France?"},
+{"role": "assistant", "content": "The capital of France is Paris."},
+\end{lstlisting}
+
+\begin{lstlisting}
+# After applying the chat template
+
+<|im_start|>system
+You are a good state predictor.<|im_end|>
+<|im_start|>user
+What is the capital of France?<|im_end|>
+<|im_start|>assistant
+The capital of France is Paris.<|im_end|>
+\end{lstlisting}
+
+This is the conversation that the model will learn to generate.
+
+\newpage
+\section{Part 7 — Instruction-Following Evaluation \& Hyperparameter Tuning}
+
+\subsection{Comparison Table}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|}
+        \hline
+        \textbf{Model} & \textbf{Strict Accuracy} & \textbf{Loose Accuracy} \\
+        \hline
+        \textbf{No SFT} & 0.13 & 0.15 \\
+        \hline
+        \textbf{Fine-Tuned Model (Default Hyperparam)} & 0.22 & 0.25 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+
+\subsection{Final Strict Accuracy}
+
+The final strict accuracy of the fine-tuned model is \textbf{0.28}.
+
+\subsection{Hyperparameter Tuning}
+
+\begin{table}[h]
+    \centering
+    \begin{tabular}{|c|c|c|c|c|c|}
+        \hline
+        \textbf{LR} & \textbf{Epochs} & \textbf{BSZ} & \textbf{Train Loss} & \textbf{Eval Strict} & \textbf{Eval Loose} \\
+        \hline
+        2e-5 & 3 & 128 & 1.584 & 0.22 & 0.25 \\
+        \hline
+        1e-5 & 3 & 128 & 0.9701 & 0.24 & 0.28 \\
+        \hline
+        5e-6 & 3 & 128 & 1.6310 & \textbf{0.28} & \textbf{0.32} \\
+        \hline
+        5e-6 & 3 & 64 & 1.628 & 0.27 & 0.30 \\
+        \hline
+        5e-6 & 3 & 256 & 1.6332 & 0.28 & 0.32 \\
+        \hline
+    \end{tabular}
+\end{table}
+
+From my experiments, I found that the learning rate has the most impact on the performance of the model, compared to batch size.
+
+\subsection{Example Outputs}
+
+\subsubsection{Example 1}
+\begin{lstlisting}
+# Before SFT
+
+{
+"follow_all_instructions": false, 
+"follow_instruction_list": [false, true], 
+"instruction_id_list": ["length_constraints:number_sentences", "punctuation:no_comma"], 
+"prompt": "Blog post from the perspective of a 16 year old girl who is being followed by a stranger. Your response should contain less than 10 sentences and no commas.", 
+"response": "The first sentence should be a question. The second sentence should be a statement. The third sentence should be a question. The fourth sentence should be a statement. The fifth sentence should be a question. The sixth sentence should be a statement. The seventh sentence should be a question. The eighth sentence should be a statement. The ninth sentence should be a question. The tenth sentence should be a statement. The eleventh sentence should be a question. The twelfth sentence should be a statement. The thirteenth sentence should be a question. The fourteenth sentence should be a statement. The fifteenth sentence should be a question. The sixteenth sentence should be a statement. The seventeenth sentence should be a question. The eighteenth sentence should be a statement. The nineteenth sentence should be a question. The twentieth sentence should be a statement. The twentieth sentence should be a question... (Rest are repeated)"
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+# After SFT
+
+{
+"follow_all_instructions": false, 
+"follow_instruction_list": [false, true], 
+"instruction_id_list": ["length_constraints:number_sentences", "punctuation:no_comma"], 
+"prompt": "Blog post from the perspective of a 16 year old girl who is being followed by a stranger. Your response should contain less than 10 sentences and no commas.", 
+"response": "Blog post from the perspective of a 16 year old girl who is being followed by a stranger. Your response should contain less than 10 sentences and no commas.\n\nThe following are the responses to the questions:\n\nQuestion 1:\n\nI am a 16 year old girl who is being followed by a stranger. I am not sure if I should tell anyone. I am not sure if I should tell anyone. I am not sure if I should tell anyone. I am not sure if I should tell anyone. I am not sure if I should tell anyone. I am not sure if I should tell anyone... (Rest are repeated)"
+}
+\end{lstlisting}
+
+\subsubsection{Example 2}
+\begin{lstlisting}
+# Before SFT
+
+{
+"follow_all_instructions": false, 
+"follow_instruction_list": [false, false], 
+"instruction_id_list": ["combination:repeat_prompt", "keywords:existence"], 
+"prompt": "Write a funny haiku about moms, containing keywords \"mom\" and \"mother\" in your response.\nFirst repeat the request word for word without change, then give your answer (1. do not say any words or characters before repeating the request; 2. the request you need to repeat does not include this sentence)", 
+"response": "The first time you repeat the request word for word without change, you will get a response of \"I do not know what to say.\"\n\nThe second time you repeat the request word for word without change, you will get a response of \"I do not know what to say.\"\n\nThe third time you repeat the request word for word without change, you will get a response of \"I do not know what to say.\"\n\nThe fourth time you repeat the request word for word without change, you will get a response of \"I do not know what to say.\"\n\nThe fifth time you repeat the request word for word without change, you will get a response of \"I do not know what to say.\"\n\nThe sixth time you repeat the request word for word without change, you will get a response of \"I do not know what to say.\"\n\nThe seventh time... (Rest are repeated)"
+}
+\end{lstlisting}
+
+\begin{lstlisting}
+# After SFT
+
+{"follow_all_instructions": false, 
+"follow_instruction_list": [false, true], 
+"instruction_id_list": ["combination:repeat_prompt", "keywords:existence"], 
+"prompt": "Write a funny haiku about moms, containing keywords \"mom\" and \"mother\" in your response.\nFirst repeat the request word for word without change, then give your answer (1. do not say any words or characters before repeating the request; 2. the request you need to repeat does not include this sentence)", 
+"response": "Write a haiku about a mom who is a good mother.\nWrite a haiku about a mom who is a good mother.\nWrite a haiku about a mom who is a good mother.\nWrite a haiku about a mom who is a good mother.\nWrite a haiku about a mom who is a good mother.\nWrite a haiku about a mom who is a good mother.\nWrite a haiku about a mom who is a good mother... (Rest are repeated)"
+}
+\end{lstlisting}
+
+
+After SFT, the model has more tendency to answer the user question and follow the instructions. In Example 1, the post in the response after SFT "I am a 16 year old girl who is being followed by a stranger. I am not sure if I should tell anyone." is relevant to the question while the respose before SFT is just repeating meaningless sentences. In Example 2, the response after SFT is able to repeat the first sentence in the question according to the instruction, while the response before SFT is not.
+
+\subsection{Analysis}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{images/evaluation_stats.png}
+    \caption{Instruction-following accuracy comparison between the model without SFT and the final fine-tuned model}\
+    \label{fig:evaluation_stats}
+\end{figure}
+
+From Figure \ref{fig:evaluation_stats}, we can see that the model without SFT has significant improvements on the accuracy for some instructions, such as "keywords:existence" and \newline
+"detectable\_format:constrained\_response". \newline
+
+
+However, the model is still struggling with some instructions, such as \newline
+"detectable\_content:number\_placeholders" or "keywords:forbidden\_words. The improvements of them are not significant and even gain a negative improvement. \newline
+
+
+For the Hyperparameter Tuning, I think lower learning rate can help because the loss curve of the fine-tuned model is not stable and oscillating. That's why I tried lower learning rate.
+
+\end{document}

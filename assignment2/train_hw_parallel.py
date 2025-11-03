@@ -22,6 +22,7 @@ import pathlib
 import pickle
 import re
 from typing import Callable, Dict, List, Optional, Tuple
+from dotenv import load_dotenv
 
 import numpy as np
 import torch
@@ -38,6 +39,8 @@ from tqdm.auto import tqdm
 from conversation_func import conversation_to_features
 from utils import normalize_conversation, QWEN3CHATTEMPLATE
 from loss_functions import compute_loss_from_logits
+
+load_dotenv()
 
 IGNORE_TOKEN_ID = LabelSmoother.ignore_index
 

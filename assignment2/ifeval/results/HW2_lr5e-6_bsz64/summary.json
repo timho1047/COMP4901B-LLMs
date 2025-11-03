@@ -1,0 +1,7 @@
+{
+  "response_file": "reslts/HW2_lr5e-6_bsz64/responses_HW2_lr5e-6_bsz64.jsonl",
+  "strict_accuracy": 0.27,
+  "loose_accuracy": 0.3,
+  "strict_accuracy_percentage": 27.0,
+  "loose_accuracy_percentage": 30.0
+}
