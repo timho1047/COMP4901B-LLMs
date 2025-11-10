@@ -50,6 +50,7 @@ COMP4901B-project/
 
 ## Submission Guidelines
 -  Please indicate the names and IDs of both teammates in the PDF report. Please also indicate the contribution percentage of each teammate in the project at the beginning of the PDF report (e.g., 50% for each teammate). If the contribution of each is around 50%, each of you will get exactly the same score. However, if the contribution deviates far from 50%, we will give different scores.
+-  **Only one student in each group needs to submit on Canvas, the other teammates plz don't submit to reduce the teaching staff's grading efforts to categorize submissions**
 
 You are expected to submit two files:  
 -   The zip file of the entire codebase (plz remove unnecessary outputs files before you zip). Name it as `[your-student-id]-[your-ust-username]-project.zip`  
