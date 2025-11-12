@@ -3,6 +3,9 @@
 # GSM8K Self-Improving Training Pipeline
 # Usage: bash self_train_gsm8k.sh <initial_model_path> [options]
 
+export WANDB_PROJECT="COMP4901B-Homework3"
+export CUDA_VISIBLE_DEVICES="0"
+
 set -e  # Exit on error
 
 # Parse arguments
@@ -60,7 +63,7 @@ TOP_P=1
 TOP_K=-1
 N_ROLLOUTS=8
 TENSOR_PARALLEL=1
-GPU_MEMORY_UTIL=0.8
+GPU_MEMORY_UTIL=0.9
 SYSTEM_MESSAGE=""
 USE_FEW_SHOT=false
 NO_CHAT_TEMPLATE=false

@@ -6,6 +6,12 @@ resolution-markers = [
     "sys_platform != 'linux'",
 ]
 
+[manifest]
+members = [
+    "assignment3",
+    "comp4901b-llms",
+]
+
 [[package]]
 name = "absl-py"
 version = "2.3.1"
@@ -163,6 +169,49 @@ wheels = [
 ]
 
 [[package]]
+name = "assignment3"
+version = "0.1.0"
+source = { virtual = "assignment3" }
+dependencies = [
+    { name = "absl-py" },
+    { name = "bitsandbytes" },
+    { name = "datasets" },
+    { name = "hjson" },
+    { name = "immutabledict" },
+    { name = "ipywidgets" },
+    { name = "langdetect" },
+    { name = "ninja" },
+    { name = "nltk" },
+    { name = "peft" },
+    { name = "torch" },
+    { name = "torchaudio" },
+    { name = "torchvision" },
+    { name = "transformers", extra = ["torch"] },
+    { name = "vllm" },
+    { name = "wandb" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "absl-py", specifier = ">=2.3.1" },
+    { name = "bitsandbytes", specifier = ">=0.48.2" },
+    { name = "datasets", specifier = "==4.0.0" },
+    { name = "hjson", specifier = ">=3.1.0" },
+    { name = "immutabledict", specifier = ">=4.2.2" },
+    { name = "ipywidgets", specifier = ">=8.1.8" },
+    { name = "langdetect", specifier = ">=1.0.9" },
+    { name = "ninja", specifier = ">=1.13.0" },
+    { name = "nltk", specifier = ">=3.9.2" },
+    { name = "peft", specifier = ">=0.17.1" },
+    { name = "torch", specifier = "==2.8.0" },
+    { name = "torchaudio", specifier = "==2.8.0" },
+    { name = "torchvision", specifier = "==0.23.0" },
+    { name = "transformers", extras = ["torch"], specifier = "==4.57.1" },
+    { name = "vllm", specifier = "==0.10.2" },
+    { name = "wandb", specifier = ">=0.22.2" },
+]
+
+[[package]]
 name = "astor"
 version = "0.8.1"
 source = { registry = "https://pypi.org/simple" }
@@ -187,6 +236,21 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/6b/5c/685e6633917e101e5dcb62b9dd76946cbb57c26e133bae9e0cd36033c0a9/attrs-25.4.0.tar.gz", hash = "sha256:16d5969b87f0859ef33a48b35d55ac1be6e42ae49d5e853b597db70c35c57e11", size = 934251, upload-time = "2025-10-06T13:54:44.725Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/3a/2a/7cc015f5b9f5db42b7d48157e23356022889fc354a2813c15934b7cb5c0e/attrs-25.4.0-py3-none-any.whl", hash = "sha256:adcf7e2a1fb3b36ac48d97835bb6d8ade15b8dcce26aba8bf1d14847b57a3373", size = 67615, upload-time = "2025-10-06T13:54:43.17Z" },
+]
+
+[[package]]
+name = "bitsandbytes"
+version = "0.48.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "torch" },
+]
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d5/56/e58f1eeb41c71d3789d401ad147fc0fa78fa7004ea58616ba6abc50889c8/bitsandbytes-0.48.2-py3-none-manylinux_2_24_aarch64.whl", hash = "sha256:defbfa374d93809de3811cd2bca6978d1d51ecaa39f5bdd2018e1394a4886603", size = 33764723, upload-time = "2025-10-29T21:40:36.389Z" },
+    { url = "https://files.pythonhosted.org/packages/3b/72/f6934097c94e023967bf7eb24e50987aca8a40f4cabf4e0282957f6258c2/bitsandbytes-0.48.2-py3-none-manylinux_2_24_x86_64.whl", hash = "sha256:cd289562cb7308ee2a707e6884fecca9bbbcfc9ec33a86df2a45e0779692c1a3", size = 59399452, upload-time = "2025-10-29T21:40:39.941Z" },
+    { url = "https://files.pythonhosted.org/packages/17/2d/309b3ba276d1fe5f3db4fb5e0a6926d10654656cdbfe49881aa95f4cfcc2/bitsandbytes-0.48.2-py3-none-win_amd64.whl", hash = "sha256:a048c285eb6ff53a8d189880e9dfa421d2bfb54e8cab263311757cf5b742d865", size = 58992447, upload-time = "2025-10-29T21:40:43.921Z" },
 ]
 
 [[package]]
@@ -1166,6 +1230,22 @@ wheels = [
 ]
 
 [[package]]
+name = "ipywidgets"
+version = "8.1.8"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "comm" },
+    { name = "ipython" },
+    { name = "jupyterlab-widgets" },
+    { name = "traitlets" },
+    { name = "widgetsnbextension" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4c/ae/c5ce1edc1afe042eadb445e95b0671b03cee61895264357956e61c0d2ac0/ipywidgets-8.1.8.tar.gz", hash = "sha256:61f969306b95f85fba6b6986b7fe45d73124d1d9e3023a8068710d47a22ea668", size = 116739, upload-time = "2025-11-01T21:18:12.393Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/56/6d/0d9848617b9f753b87f214f1c682592f7ca42de085f564352f10f0843026/ipywidgets-8.1.8-py3-none-any.whl", hash = "sha256:ecaca67aed704a338f88f67b1181b58f821ab5dc89c1f0f5ef99db43c1c2921e", size = 139808, upload-time = "2025-11-01T21:18:10.956Z" },
+]
+
+[[package]]
 name = "jedi"
 version = "0.19.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1303,6 +1383,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/02/49/9d1284d0dc65e2c757b74c6687b6d319b02f822ad039e5c512df9194d9dd/jupyter_core-5.9.1.tar.gz", hash = "sha256:4d09aaff303b9566c3ce657f580bd089ff5c91f5f89cf7d8846c3cdf465b5508", size = 89814, upload-time = "2025-10-16T19:19:18.444Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/e7/e7/80988e32bf6f73919a113473a604f5a8f09094de312b9d52b79c2df7612b/jupyter_core-5.9.1-py3-none-any.whl", hash = "sha256:ebf87fdc6073d142e114c72c9e29a9d7ca03fad818c5d300ce2adc1fb0743407", size = 29032, upload-time = "2025-10-16T19:19:16.783Z" },
+]
+
+[[package]]
+name = "jupyterlab-widgets"
+version = "3.0.16"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/26/2d/ef58fed122b268c69c0aa099da20bc67657cdfb2e222688d5731bd5b971d/jupyterlab_widgets-3.0.16.tar.gz", hash = "sha256:423da05071d55cf27a9e602216d35a3a65a3e41cdf9c5d3b643b814ce38c19e0", size = 897423, upload-time = "2025-11-01T21:11:29.724Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ab/b5/36c712098e6191d1b4e349304ef73a8d06aed77e56ceaac8c0a306c7bda1/jupyterlab_widgets-3.0.16-py3-none-any.whl", hash = "sha256:45fa36d9c6422cf2559198e4db481aa243c7a32d9926b500781c830c80f7ecf8", size = 914926, upload-time = "2025-11-01T21:11:28.008Z" },
 ]
 
 [[package]]
@@ -2150,6 +2239,27 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/86/13/459e86c9c67a006651803a3df3d0b08f7708bc5483fdc482582d75562949/partial_json_parser-0.2.1.1.post6.tar.gz", hash = "sha256:43896b68929678224cbbe4884a6a5fe9251ded4b30b8b7d7eb569e5feea93afc", size = 10299, upload-time = "2025-06-23T17:51:45.372Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/cb/40/1f922794af3dc7503f19319a8804b398a161a2cd54183cff8b12225b8d85/partial_json_parser-0.2.1.1.post6-py3-none-any.whl", hash = "sha256:abc332f09b13ef5233384dbfe7128a0e9ea3fa4b8f8be9b37ac1b433c810e99e", size = 10876, upload-time = "2025-06-23T17:51:44.332Z" },
+]
+
+[[package]]
+name = "peft"
+version = "0.17.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "accelerate" },
+    { name = "huggingface-hub" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "psutil" },
+    { name = "pyyaml" },
+    { name = "safetensors" },
+    { name = "torch" },
+    { name = "tqdm" },
+    { name = "transformers" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/70/b8/2e79377efaa1e5f0d70a497db7914ffd355846e760ffa2f7883ab0f600fb/peft-0.17.1.tar.gz", hash = "sha256:e6002b42517976c290b3b8bbb9829a33dd5d470676b2dec7cb4df8501b77eb9f", size = 568192, upload-time = "2025-08-21T09:25:22.703Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/49/fe/a2da1627aa9cb6310b6034598363bd26ac301c4a99d21f415b1b2855891e/peft-0.17.1-py3-none-any.whl", hash = "sha256:3d129d64def3d74779c32a080d2567e5f7b674e77d546e3585138216d903f99e", size = 504896, upload-time = "2025-08-21T09:25:18.974Z" },
 ]
 
 [[package]]
@@ -3844,6 +3954,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/86/eb/20b6cdf273913d0ad05a6a14aed4b9a85591c18a987a3d47f20fa13dcc47/websockets-15.0.1-cp313-cp313-win32.whl", hash = "sha256:ba9e56e8ceeeedb2e080147ba85ffcd5cd0711b89576b83784d8605a7df455fa", size = 176393, upload-time = "2025-03-05T20:02:53.814Z" },
     { url = "https://files.pythonhosted.org/packages/1b/6c/c65773d6cab416a64d191d6ee8a8b1c68a09970ea6909d16965d26bfed1e/websockets-15.0.1-cp313-cp313-win_amd64.whl", hash = "sha256:e09473f095a819042ecb2ab9465aee615bd9c2028e4ef7d933600a8401c79561", size = 176837, upload-time = "2025-03-05T20:02:55.237Z" },
     { url = "https://files.pythonhosted.org/packages/fa/a8/5b41e0da817d64113292ab1f8247140aac61cbf6cfd085d6a0fa77f4984f/websockets-15.0.1-py3-none-any.whl", hash = "sha256:f7a866fbc1e97b5c617ee4116daaa09b722101d4a3c170c787450ba409f9736f", size = 169743, upload-time = "2025-03-05T20:03:39.41Z" },
+]
+
+[[package]]
+name = "widgetsnbextension"
+version = "4.0.15"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bd/f4/c67440c7fb409a71b7404b7aefcd7569a9c0d6bd071299bf4198ae7a5d95/widgetsnbextension-4.0.15.tar.gz", hash = "sha256:de8610639996f1567952d763a5a41af8af37f2575a41f9852a38f947eb82a3b9", size = 1097402, upload-time = "2025-11-01T21:15:55.178Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/3f/0e/fa3b193432cfc60c93b42f3be03365f5f909d2b3ea410295cf36df739e31/widgetsnbextension-4.0.15-py3-none-any.whl", hash = "sha256:8156704e4346a571d9ce73b84bee86a29906c9abfd7223b7228a28899ccf3366", size = 2196503, upload-time = "2025-11-01T21:15:53.565Z" },
 ]
 
 [[package]]

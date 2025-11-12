@@ -5,6 +5,9 @@ import itertools
 import numpy as np
 from typing import Optional, Union, List
 from collections import defaultdict
+from dotenv import load_dotenv
+
+load_dotenv()
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Extract and evaluate answers from model outputs')
@@ -63,6 +66,21 @@ def estimate_pass_at_k(
     # Expected return: numpy array with one pass@k value per problem
     # =======================================================================
     pass_at_k_values = np.array([0.0])  # Replace this line with your implementation
+    
+    num_samples = np.array(num_samples) # (N,) or (, )
+    num_correct = np.array(num_correct) # (N,)
+    
+    if num_samples.ndim == 0:
+        num_samples = np.full(num_correct.shape, num_samples.item()) # (N,)
+    
+    pass_at_k_values = np.full(num_correct.shape, 1.0)
+    normal_indices = np.where((num_samples - num_correct) >= k)[0]
+        
+    for i in normal_indices:
+        n, c = num_samples[i], num_correct[i]
+        ratios = np.arange(n - c - k + 1, n - c + 1) / np.arange(n - k + 1, n + 1)
+        pass_at_k_values[i] = 1 - np.prod(ratios)
+    
     # =======================================================================
     return pass_at_k_values
 
@@ -117,6 +135,16 @@ def extract_solution(solution_str: str) -> Optional[str]:
     # - For numbers: r'(\-?[0-9\.\,]+)' matches integers, decimals, negative numbers
     # =======================================================================
     extracted_solution = None  # Replace this line with your implementation
+    BOX_PATTERN = r'\\boxed\{([^}]+)\}'
+    NUMBER_PATTERN = r'(\-?[0-9\.\,]+)'
+    
+    answers = re.findall(BOX_PATTERN, solution_str)
+    if len(answers) == 0:
+        answers = re.findall(NUMBER_PATTERN, solution_str)
+    if len(answers) == 0:
+        return None
+        
+    extracted_solution = answers[-1].replace(',', '').replace('$', '')
     # =======================================================================
     return extracted_solution
 
@@ -145,8 +173,14 @@ def compute_score(solution_str: str, ground_truth: str) -> int:
     #    - Return 1 if they match, 0 otherwise
     #
     # Hint: Some answers might not be valid numbers, handle ValueError gracefully
-    # =======================================================================
-    is_correct = 0  # Replace this line with your implementation
+    # =======================================================================    
+    
+    is_correct = 0
+    try:
+        if answer is not None:
+            is_correct = str(float(answer)) == str(float(ground_truth))
+    except ValueError:
+        pass
     # =======================================================================
     return is_correct
 

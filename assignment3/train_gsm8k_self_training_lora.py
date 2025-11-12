@@ -11,6 +11,7 @@ you need to set CUDA_VISIBLE_DEVICES to a single GPU (e.g., export CUDA_VISIBLE_
 or modify the script to properly handle distributed training with custom loss function.
 """
 
+from dotenv import load_dotenv
 from dataclasses import dataclass, field
 import gc
 import json
@@ -35,6 +36,8 @@ IGNORE_TOKEN_ID = LabelSmoother.ignore_index
 CACHE_VERSION = 1
 
 local_rank = None
+
+load_dotenv()
 
 
 def rank0_print(*args):
@@ -423,6 +426,7 @@ class LoRAAdapterManager:
         #
         # Hint: Look at the imports at the top of this file
         # =======================================================================
+        self.model = get_peft_model(self.model, lora_config)
 
         return self.model
 
@@ -459,9 +463,30 @@ class LoRAAdapterManager:
             List of module names to apply LoRA to (e.g., ["q_proj", "k_proj", "v_proj"])
         """
         # ==================== TODO: Implement this method ====================
+        
+        
+        VALID_TARGETS_BY_MODEL = {
+            "qwen3": {"q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"},
+            "llama": {'o_proj', 'k_proj', 'up_proj', 'gate_proj', 'v_proj', 'q_proj', 'down_proj'},
+            "mistral": {'k_proj', 'o_proj', 'down_proj', 'q_proj', 'up_proj', 'gate_proj', 'v_proj'},
+            "opt": {'k_proj', 'q_proj', 'project_out', 'fc1', 'v_proj', 'out_proj', 'project_in', 'fc2'}
+        }
+        
+        model_type: str = self.model.config.model_type
+                        
+        if self.lora_args.lora_target_modules:
+            targets = set(self.lora_args.lora_target_modules)
+        elif model_type in VALID_TARGETS_BY_MODEL:
+            targets = VALID_TARGETS_BY_MODEL[model_type]
+        else:
+            raise ValueError(f"No valid target modules found for model type: {model_type}")
+            
+        available_modules = {name.split(".")[-1] for name, module in self.model.named_modules() if isinstance(module, nn.Linear)}
+
+        assert targets <= available_modules, f"Invalid target modules: {targets} not in {available_modules}"
+        valid_targets = list(targets)
 
         # =====================================================================
-        valid_targets = []  # Replace with your implementation
         return valid_targets
 
 

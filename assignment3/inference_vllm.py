@@ -11,7 +11,7 @@ import logging
 from pathlib import Path
 from typing import List, Dict
 from tqdm import tqdm
-
+from dotenv import load_dotenv
 from vllm import LLM, SamplingParams
 from transformers import AutoTokenizer
 from datasets import load_dataset
@@ -23,6 +23,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+load_dotenv()
 
 # Few-shot prompt with 8 examples
 FEW_SHOT_PROMPT = """Q: There are 15 trees in the grove. Grove workers will plant trees in the grove today. After they are done, there will be 21 trees. How many trees did the grove workers plant today?
@@ -126,6 +127,23 @@ def format_prompts(
     # Hint: The chat template transforms messages into the model's expected format
     # (e.g., "<|im_start|>user\n{content}<|im_end|>" for Qwen models)
     # =======================================================================
+    
+    for question in questions:
+        prompt_template = FEW_SHOT_PROMPT if use_few_shot else ZERO_SHOT_PROMPT
+        formatted_prompt = prompt_template.format(question=question)
+        
+        if use_chat_template and tokenizer is not None:
+            try:
+                messages = []
+                if system_message is not None:
+                    messages.append({"role": "system", "content": system_message})
+                messages.append({"role": "user", "content": formatted_prompt})
+                formatted_prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+            except Exception as e:
+                logger.warning(f"Error applying chat template: {e}, use raw prompt instead")
+        
+        formatted_prompts.append(formatted_prompt)
+        
     return formatted_prompts
 
 
@@ -237,7 +255,21 @@ def run_inference(
     # Hint: Check the VLLM documentation for LLM and SamplingParams classes
     # can refer to https://docs.vllm.ai/en/stable/getting_started/quickstart.html
     # =======================================================================
-
+    
+    llm = LLM(
+        model=model_path,
+        tensor_parallel_size=tensor_parallel_size,
+        gpu_memory_utilization=gpu_memory_utilization,
+    )
+    sampling_params = SamplingParams(
+        n=n_rollouts,
+        temperature=temperature,
+        top_p=top_p,
+        top_k=top_k,
+        max_tokens=max_tokens,
+        stop_token_ids=[tokenizer.eos_token_id] if tokenizer is not None else None
+    )
+    outputs = llm.generate(formatted_prompts, sampling_params=sampling_params)
 
     # Save results
     logger.info(f"Saving results to {output_path}")
