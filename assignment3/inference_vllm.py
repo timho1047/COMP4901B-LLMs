@@ -255,20 +255,22 @@ def run_inference(
     # Hint: Check the VLLM documentation for LLM and SamplingParams classes
     # can refer to https://docs.vllm.ai/en/stable/getting_started/quickstart.html
     # =======================================================================
-    
+    DEFAULT_TEMPERATURE = 0.6
     llm = LLM(
         model=model_path,
         tensor_parallel_size=tensor_parallel_size,
         gpu_memory_utilization=gpu_memory_utilization,
+        trust_remote_code=True
     )
     sampling_params = SamplingParams(
         n=n_rollouts,
-        temperature=temperature,
+        temperature= DEFAULT_TEMPERATURE if n_rollouts > 1 and temperature == 0.0 else temperature,
         top_p=top_p,
         top_k=top_k,
         max_tokens=max_tokens,
-        stop_token_ids=[tokenizer.eos_token_id] if tokenizer is not None else None
     )
+    
+    # Generate outputs
     outputs = llm.generate(formatted_prompts, sampling_params=sampling_params)
 
     # Save results

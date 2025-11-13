@@ -485,6 +485,8 @@ class LoRAAdapterManager:
 
         assert targets <= available_modules, f"Invalid target modules: {targets} not in {available_modules}"
         valid_targets = list(targets)
+        
+        print("=" * 10 + f"\nValid targets: {valid_targets}\n" + "=" * 10)
 
         # =====================================================================
         return valid_targets

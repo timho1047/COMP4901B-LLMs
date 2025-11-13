@@ -136,7 +136,7 @@ def extract_solution(solution_str: str) -> Optional[str]:
     # =======================================================================
     extracted_solution = None  # Replace this line with your implementation
     BOX_PATTERN = r'\\boxed\{([^}]+)\}'
-    NUMBER_PATTERN = r'(\-?[0-9\.\,]+)'
+    NUMBER_PATTERN = r'(-?(?:\d{1,3}(?:,\d{3})*|\d+)(?:\.\d+)?)'
     
     answers = re.findall(BOX_PATTERN, solution_str)
     if len(answers) == 0:
