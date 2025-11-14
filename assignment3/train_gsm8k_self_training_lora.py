@@ -426,6 +426,7 @@ class LoRAAdapterManager:
         #
         # Hint: Look at the imports at the top of this file
         # =======================================================================
+        self.model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
         self.model = get_peft_model(self.model, lora_config)
 
         return self.model
