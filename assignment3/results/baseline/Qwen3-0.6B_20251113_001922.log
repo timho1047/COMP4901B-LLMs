@@ -1,0 +1,125 @@
+========================================
+GSM8K Evaluation Pipeline
+========================================
+Model: Qwen3-0.6B
+Output Directory: results/baseline
+Run Name: Qwen3-0.6B_20251113_001922
+Dataset Split: test
+Number of Queries: All
+Max Tokens: 512
+Temperature: 0.0
+Top-p: 1.0
+Top-k: -1
+Number of Rollouts: 1
+Tensor Parallel: 1
+Mode: Zero-shot
+Chat Template: Enabled
+Thinking Mode: Disabled
+========================================
+
+[1/2] Running inference...
+Output will be saved to: results/baseline/Qwen3-0.6B_20251113_001922_inference.jsonl
+
+Running: python inference_vllm.py     --model_path "Qwen3-0.6B"     --output_path "results/baseline/Qwen3-0.6B_20251113_001922_inference.jsonl"     --max_tokens 512     --temperature 0.0     --top_p 1.0     --top_k -1     --n_rollouts 1     --tensor_parallel_size 1     --gpu_memory_utilization 0.8     --split test     --n_queries -1
+INFO 11-13 00:19:25 [__init__.py:216] Automatically detected platform cuda.
+2025-11-13 00:19:26,297 - INFO - ================================================================================
+2025-11-13 00:19:26,297 - INFO - Starting VLLM Inference for GSM8K
+2025-11-13 00:19:26,297 - INFO - ================================================================================
+2025-11-13 00:19:26,297 - INFO - Model path: Qwen3-0.6B
+2025-11-13 00:19:26,297 - INFO - Output path: results/baseline/Qwen3-0.6B_20251113_001922_inference.jsonl
+2025-11-13 00:19:26,297 - INFO - Dataset split: test
+2025-11-13 00:19:26,297 - INFO - Mode: Zero-shot
+2025-11-13 00:19:26,297 - INFO - Chat template: Enabled
+2025-11-13 00:19:26,297 - INFO - Thinking mode: Disabled
+2025-11-13 00:19:26,297 - INFO - Tensor parallel size: 1
+2025-11-13 00:19:26,297 - INFO - Max tokens: 512
+2025-11-13 00:19:26,297 - INFO - Temperature: 0.0
+2025-11-13 00:19:26,297 - INFO - Top-p: 1.0
+2025-11-13 00:19:26,297 - INFO - Top-k: -1
+2025-11-13 00:19:26,297 - INFO - Number of rollouts per question: 1
+2025-11-13 00:19:26,297 - INFO - Loading GSM8K dataset (split: test)...
+2025-11-13 00:19:26,320 - INFO - Loaded 1319 examples from GSM8K test set
+2025-11-13 00:19:26,320 - INFO - Using full dataset (1319 queries)
+2025-11-13 00:19:26,348 - INFO - Loading tokenizer from Qwen3-0.6B
+2025-11-13 00:19:26,635 - INFO - Formatting prompts...
+2025-11-13 00:19:26,685 - INFO - Initializing VLLM engine
+INFO 11-13 00:19:26 [utils.py:328] non-default args: {'tokenizer': Qwen2TokenizerFast(name_or_path='Qwen3-0.6B', vocab_size=151643, model_max_length=131072, is_fast=True, padding_side='right', truncation_side='right', special_tokens={'eos_token': '<|im_end|>', 'pad_token': '<|endoftext|>', 'additional_special_tokens': ['<|im_start|>', '<|im_end|>', '<|object_ref_start|>', '<|object_ref_end|>', '<|box_start|>', '<|box_end|>', '<|quad_start|>', '<|quad_end|>', '<|vision_start|>', '<|vision_end|>', '<|vision_pad|>', '<|image_pad|>', '<|video_pad|>']}, clean_up_tokenization_spaces=False, added_tokens_decoder={
+INFO 11-13 00:19:26 [utils.py:328] 	151643: AddedToken("<|endoftext|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151644: AddedToken("<|im_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151645: AddedToken("<|im_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151646: AddedToken("<|object_ref_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151647: AddedToken("<|object_ref_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151648: AddedToken("<|box_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151649: AddedToken("<|box_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151650: AddedToken("<|quad_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151651: AddedToken("<|quad_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151652: AddedToken("<|vision_start|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151653: AddedToken("<|vision_end|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151654: AddedToken("<|vision_pad|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151655: AddedToken("<|image_pad|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151656: AddedToken("<|video_pad|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=True),
+INFO 11-13 00:19:26 [utils.py:328] 	151657: AddedToken("<tool_call>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151658: AddedToken("</tool_call>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151659: AddedToken("<|fim_prefix|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151660: AddedToken("<|fim_middle|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151661: AddedToken("<|fim_suffix|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151662: AddedToken("<|fim_pad|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151663: AddedToken("<|repo_name|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151664: AddedToken("<|file_sep|>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151665: AddedToken("<tool_response>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151666: AddedToken("</tool_response>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151667: AddedToken("<think>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] 	151668: AddedToken("</think>", rstrip=False, lstrip=False, single_word=False, normalized=False, special=False),
+INFO 11-13 00:19:26 [utils.py:328] }
+INFO 11-13 00:19:26 [utils.py:328] ), 'gpu_memory_utilization': 0.8, 'disable_log_stats': True, 'model': 'Qwen3-0.6B'}
+Traceback (most recent call last):
+  File "/home/timho/workspace/COMP4901B-LLMs/assignment3/inference_vllm.py", line 434, in <module>
+    main()
+    ~~~~^^
+  File "/home/timho/workspace/COMP4901B-LLMs/assignment3/inference_vllm.py", line 413, in main
+    run_inference(
+    ~~~~~~~~~~~~~^
+        model_path=args.model_path,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<14 lines>...
+        n_queries=args.n_queries,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "/home/timho/workspace/COMP4901B-LLMs/assignment3/inference_vllm.py", line 259, in run_inference
+    llm = LLM(
+        model=model_path,
+    ...<2 lines>...
+        tokenizer=tokenizer,
+    )
+  File "/home/timho/workspace/COMP4901B-LLMs/.venv/lib/python3.13/site-packages/vllm/entrypoints/llm.py", line 282, in __init__
+    self.llm_engine = LLMEngine.from_engine_args(
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        engine_args=engine_args, usage_context=UsageContext.LLM_CLASS)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/timho/workspace/COMP4901B-LLMs/.venv/lib/python3.13/site-packages/vllm/engine/llm_engine.py", line 486, in from_engine_args
+    vllm_config = engine_args.create_engine_config(usage_context)
+  File "/home/timho/workspace/COMP4901B-LLMs/.venv/lib/python3.13/site-packages/vllm/engine/arg_utils.py", line 1119, in create_engine_config
+    model_config = self.create_model_config()
+  File "/home/timho/workspace/COMP4901B-LLMs/.venv/lib/python3.13/site-packages/vllm/engine/arg_utils.py", line 963, in create_model_config
+    return ModelConfig(
+        model=self.model,
+    ...<45 lines>...
+        io_processor_plugin=self.io_processor_plugin,
+    )
+  File "/home/timho/workspace/COMP4901B-LLMs/.venv/lib/python3.13/site-packages/pydantic/_internal/_dataclasses.py", line 121, in __init__
+    s.__pydantic_validator__.validate_python(ArgsKwargs(args, kwargs), self_instance=s)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/timho/workspace/COMP4901B-LLMs/.venv/lib/python3.13/site-packages/vllm/config/__init__.py", line 598, in __post_init__
+    self.maybe_pull_model_tokenizer_for_runai(self.model, self.tokenizer)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/timho/workspace/COMP4901B-LLMs/.venv/lib/python3.13/site-packages/vllm/config/__init__.py", line 842, in maybe_pull_model_tokenizer_for_runai
+    if not (is_runai_obj_uri(model) or is_runai_obj_uri(tokenizer)):
+                                       ~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/home/timho/workspace/COMP4901B-LLMs/.venv/lib/python3.13/site-packages/vllm/transformers_utils/runai_utils.py", line 45, in is_runai_obj_uri
+    return model_or_path.lower().startswith(tuple(SUPPORTED_SCHEMES))
+           ^^^^^^^^^^^^^^^^^^^
+  File "/home/timho/workspace/COMP4901B-LLMs/.venv/lib/python3.13/site-packages/transformers/tokenization_utils_base.py", line 1127, in __getattr__
+    raise AttributeError(f"{self.__class__.__name__} has no attribute {key}")
+AttributeError: Qwen2TokenizerFast has no attribute lower
+ERROR: Inference failed - output file not created

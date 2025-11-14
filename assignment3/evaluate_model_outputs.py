@@ -74,9 +74,8 @@ def estimate_pass_at_k(
         num_samples = np.full(num_correct.shape, num_samples.item()) # (N,)
     
     pass_at_k_values = np.full(num_correct.shape, 1.0)
-    normal_indices = np.where((num_samples - num_correct) >= k)[0]
         
-    for i in normal_indices:
+    for i in np.where((num_samples - num_correct) >= k)[0]:
         n, c = num_samples[i], num_correct[i]
         ratios = np.arange(n - c - k + 1, n - c + 1) / np.arange(n - k + 1, n + 1)
         pass_at_k_values[i] = 1 - np.prod(ratios)

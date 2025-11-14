@@ -138,7 +138,7 @@ def format_prompts(
                 if system_message is not None:
                     messages.append({"role": "system", "content": system_message})
                 messages.append({"role": "user", "content": formatted_prompt})
-                formatted_prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+                formatted_prompt = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, enable_thinking=enable_thinking)
             except Exception as e:
                 logger.warning(f"Error applying chat template: {e}, use raw prompt instead")
         
@@ -256,20 +256,20 @@ def run_inference(
     # can refer to https://docs.vllm.ai/en/stable/getting_started/quickstart.html
     # =======================================================================
     DEFAULT_TEMPERATURE = 0.6
+    
     llm = LLM(
         model=model_path,
         tensor_parallel_size=tensor_parallel_size,
         gpu_memory_utilization=gpu_memory_utilization,
-        trust_remote_code=True
     )
     sampling_params = SamplingParams(
         n=n_rollouts,
-        temperature= DEFAULT_TEMPERATURE if n_rollouts > 1 and temperature == 0.0 else temperature,
+        temperature=DEFAULT_TEMPERATURE if n_rollouts > 1 and temperature == 0.0 else 0.0 if n_rollouts == 1 else temperature,
         top_p=top_p,
         top_k=top_k,
         max_tokens=max_tokens,
     )
-    
+        
     # Generate outputs
     outputs = llm.generate(formatted_prompts, sampling_params=sampling_params)
 

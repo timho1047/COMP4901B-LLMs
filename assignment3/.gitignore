@@ -3,5 +3,6 @@ gsm8k-local
 Mistral-7B-Instruct-v0.3
 mistral-7b-bnb-4bit
 
-**.log
 .hf_cache
+**.aux
+**.out

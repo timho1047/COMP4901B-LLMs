@@ -469,7 +469,7 @@ class LoRAAdapterManager:
             "qwen3": {"q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"},
             "llama": {'o_proj', 'k_proj', 'up_proj', 'gate_proj', 'v_proj', 'q_proj', 'down_proj'},
             "mistral": {'k_proj', 'o_proj', 'down_proj', 'q_proj', 'up_proj', 'gate_proj', 'v_proj'},
-            "opt": {'k_proj', 'q_proj', 'project_out', 'fc1', 'v_proj', 'out_proj', 'project_in', 'fc2'}
+            "opt": {'k_proj', 'q_proj', 'fc1', 'v_proj', 'out_proj', 'fc2'}
         }
         
         model_type: str = self.model.config.model_type
@@ -486,8 +486,6 @@ class LoRAAdapterManager:
         assert targets <= available_modules, f"Invalid target modules: {targets} not in {available_modules}"
         valid_targets = list(targets)
         
-        print("=" * 10 + f"\nValid targets: {valid_targets}\n" + "=" * 10)
-
         # =====================================================================
         return valid_targets
 
