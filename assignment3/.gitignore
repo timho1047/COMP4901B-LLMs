@@ -6,3 +6,9 @@ mistral-7b-bnb-4bit
 .hf_cache
 **.aux
 **.out
+
+ckpt/**/models
+ckpt/**/*.pickle
+ckpt/**/*.jsonl
+
+results/**/*.jsonl
