@@ -1,0 +1,63 @@
+========================================
+GSM8K Self-Improving Training Pipeline
+========================================
+Run Name: lr_1e-5
+Initial Model: Qwen3-0.6B
+Pipeline Directory: ckpt/lr_1e-5
+Number of Iterations: 1
+
+Inference Settings:
+  Dataset Split: train
+  Number of Queries: 2000
+  Max Tokens: 512
+  Temperature: 1.0
+  Top-p: 1
+  Top-k: -1
+  Number of Rollouts: 8
+  Tensor Parallel: 1
+  Mode: Zero-shot
+  Chat Template: Enabled
+  Thinking Mode: Disabled
+
+Training Settings:
+  Learning Rate: 1e-5
+  Total Batch Size: 128
+  Batch Size Per Device: 4
+  Gradient Accumulation Steps: 32 (auto-calculated)
+  Number of Epochs: 1
+  Save Steps: 30
+  LoRA Rank: 64
+  Model Max Length: 712 (auto-calculated: MAX_TOKENS + 200)
+========================================
+
+========================================
+ITERATION 0 / 0
+========================================
+Model: Qwen3-0.6B
+
+[Step 1/4] Running inference...
+Output: ckpt/lr_1e-5/iteration_0/inference.jsonl
+
+✓ Inference completed
+
+[Step 2/4] Running evaluation...
+Output: ckpt/lr_1e-5/iteration_0/evaluation.jsonl
+
+✓ Evaluation completed
+
+[Step 3/4] Filtering correct examples...
+Output: ckpt/lr_1e-5/iteration_0/correct_examples.jsonl
+
+Number of correct examples: 9397
+✓ Filtering completed
+
+[Step 4/4] Training on correct examples...
+Training data: ckpt/lr_1e-5/iteration_0/correct_examples.jsonl
+New model will be saved to: ckpt/lr_1e-5/models/model_iter_1
+
+
+Using merged LoRA model: ckpt/lr_1e-5/models/model_iter_1-merged
+✓ Training completed
+
+✓ Iteration 0 completed
+

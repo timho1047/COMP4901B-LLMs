@@ -612,6 +612,7 @@ def train():
         local_rank=local_rank,
     )
     model = lora_manager.apply_adapters()
+    # model.to("cuda")
 
     tokenizer = transformers.AutoTokenizer.from_pretrained(
         model_args.model_name_or_path,
@@ -639,6 +640,7 @@ def train():
         data_args=data_args,
     )
 
+    model.to("cuda")
     trainer = Trainer(
         model=model,
         tokenizer=tokenizer,

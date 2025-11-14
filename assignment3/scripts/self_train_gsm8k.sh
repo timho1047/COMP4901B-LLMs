@@ -54,7 +54,7 @@ shift
 
 # Default values
 OUTPUT_DIR="ckpt"
-RUN_NAME="first-run"
+RUN_NAME="lr_4e-5"
 NUM_ITERATIONS=1
 MAX_TOKENS=512
 TEMPERATURE=1.0
@@ -62,18 +62,19 @@ TOP_P=1
 TOP_K=-1
 N_ROLLOUTS=8
 TENSOR_PARALLEL=1
-GPU_MEMORY_UTIL=0.4
+GPU_MEMORY_UTIL=0.8
 SYSTEM_MESSAGE=""
 USE_FEW_SHOT=false
 NO_CHAT_TEMPLATE=false
 ENABLE_THINKING=false
 SPLIT="train"
 N_QUERIES=2000
+# N_QUERIES=100
 
 # Training parameters
-LEARNING_RATE=2e-5
+LEARNING_RATE=4e-5
 TOTAL_BATCH_SIZE=128
-BATCH_SIZE_PER_DEV=1
+BATCH_SIZE_PER_DEV=4
 NUM_EPOCHS=1
 SAVE_STEPS=30
 LORA_R=64
@@ -360,7 +361,7 @@ for ((iter=0; iter<NUM_ITERATIONS; iter++)); do
 
 
     # Force single GPU training (multi-GPU not yet supported)
-    export CUDA_VISIBLE_DEVICES="0"
+    # export CUDA_VISIBLE_DEVICES="0"
 
     TRAIN_CMD="python train_gsm8k_self_training_lora.py \
         --model_name_or_path \"$CURRENT_MODEL_PATH\" \
