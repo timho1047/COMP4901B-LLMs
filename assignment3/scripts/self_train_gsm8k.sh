@@ -4,7 +4,6 @@
 # Usage: bash self_train_gsm8k.sh <initial_model_path> [options]
 
 export WANDB_PROJECT="COMP4901B-Homework3"
-export CUDA_VISIBLE_DEVICES="0"
 
 set -e  # Exit on error
 
