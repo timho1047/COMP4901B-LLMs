@@ -1,0 +1,82 @@
+========================================
+GSM8K Self-Improving Training Pipeline
+========================================
+Run Name: q_1500
+Initial Model: Qwen3-0.6B
+Pipeline Directory: ckpt/q_1500
+Number of Iterations: 1
+
+Inference Settings:
+  Dataset Split: train
+  Number of Queries: 1500
+  Max Tokens: 512
+  Temperature: 1.0
+  Top-p: 1
+  Top-k: -1
+  Number of Rollouts: 8
+  Tensor Parallel: 1
+  Mode: Zero-shot
+  Chat Template: Enabled
+  Thinking Mode: Disabled
+
+Training Settings:
+  Learning Rate: 2e-5
+  Total Batch Size: 128
+  Batch Size Per Device: 4
+  Gradient Accumulation Steps: 32 (auto-calculated)
+  Number of Epochs: 1
+  Save Steps: 30
+  LoRA Rank: 64
+  Model Max Length: 712 (auto-calculated: MAX_TOKENS + 200)
+========================================
+
+========================================
+ITERATION 0 / 0
+========================================
+Model: Qwen3-0.6B
+
+[Step 1/4] Running inference...
+Output: ckpt/q_1500/iteration_0/inference.jsonl
+
+✓ Inference completed
+
+[Step 2/4] Running evaluation...
+Output: ckpt/q_1500/iteration_0/evaluation.jsonl
+
+✓ Evaluation completed
+
+[Step 3/4] Filtering correct examples...
+Output: ckpt/q_1500/iteration_0/correct_examples.jsonl
+
+Number of correct examples: 7013
+✓ Filtering completed
+
+[Step 4/4] Training on correct examples...
+Training data: ckpt/q_1500/iteration_0/correct_examples.jsonl
+New model will be saved to: ckpt/q_1500/models/model_iter_1
+
+
+Using merged LoRA model: ckpt/q_1500/models/model_iter_1-merged
+✓ Training completed
+
+✓ Iteration 0 completed
+
+========================================
+Self-Training Pipeline Summary
+========================================
+Pipeline Directory: ckpt/q_1500
+Iterations Completed: 1 / 1
+
+Results by iteration:
+  Iteration 0: 7013 correct examples
+
+Logs:
+  - Main log: ckpt/q_1500/logs/pipeline.log
+  - Iteration logs: ckpt/q_1500/iteration_*/iteration.log
+
+✓ All iterations completed successfully!
+✓ Final model saved to: ckpt/q_1500/models/model_iter_1-merged
+
+========================================
+Pipeline finished!
+========================================
