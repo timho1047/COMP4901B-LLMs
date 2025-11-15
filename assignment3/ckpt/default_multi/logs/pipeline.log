@@ -1,0 +1,178 @@
+========================================
+GSM8K Self-Improving Training Pipeline
+========================================
+Run Name: default_multi
+Initial Model: Qwen3-0.6B
+Pipeline Directory: ckpt/default_multi
+Number of Iterations: 4
+
+Inference Settings:
+  Dataset Split: train
+  Number of Queries: 2000
+  Max Tokens: 512
+  Temperature: 1.0
+  Top-p: 1
+  Top-k: -1
+  Number of Rollouts: 8
+  Tensor Parallel: 1
+  Mode: Zero-shot
+  Chat Template: Enabled
+  Thinking Mode: Disabled
+
+Training Settings:
+  Learning Rate: 2e-5
+  Total Batch Size: 128
+  Batch Size Per Device: 4
+  Gradient Accumulation Steps: 32 (auto-calculated)
+  Number of Epochs: 1
+  Save Steps: 30
+  LoRA Rank: 64
+  Model Max Length: 712 (auto-calculated: MAX_TOKENS + 200)
+========================================
+
+========================================
+ITERATION 0 / 3
+========================================
+Model: Qwen3-0.6B
+
+[Step 1/4] Running inference...
+Output: ckpt/default_multi/iteration_0/inference.jsonl
+
+✓ Inference completed
+
+[Step 2/4] Running evaluation...
+Output: ckpt/default_multi/iteration_0/evaluation.jsonl
+
+✓ Evaluation completed
+
+[Step 3/4] Filtering correct examples...
+Output: ckpt/default_multi/iteration_0/correct_examples.jsonl
+
+Number of correct examples: 9338
+✓ Filtering completed
+
+[Step 4/4] Training on correct examples...
+Training data: ckpt/default_multi/iteration_0/correct_examples.jsonl
+New model will be saved to: ckpt/default_multi/models/model_iter_1
+
+
+Using merged LoRA model: ckpt/default_multi/models/model_iter_1-merged
+✓ Training completed
+
+✓ Iteration 0 completed
+
+========================================
+ITERATION 1 / 3
+========================================
+Model: ckpt/default_multi/models/model_iter_1-merged
+
+[Step 1/4] Running inference...
+Output: ckpt/default_multi/iteration_1/inference.jsonl
+
+✓ Inference completed
+
+[Step 2/4] Running evaluation...
+Output: ckpt/default_multi/iteration_1/evaluation.jsonl
+
+✓ Evaluation completed
+
+[Step 3/4] Filtering correct examples...
+Output: ckpt/default_multi/iteration_1/correct_examples.jsonl
+
+Number of correct examples: 9716
+✓ Filtering completed
+
+[Step 4/4] Training on correct examples...
+Training data: ckpt/default_multi/iteration_1/correct_examples.jsonl
+New model will be saved to: ckpt/default_multi/models/model_iter_2
+
+
+Using merged LoRA model: ckpt/default_multi/models/model_iter_2-merged
+✓ Training completed
+
+✓ Iteration 1 completed
+
+========================================
+ITERATION 2 / 3
+========================================
+Model: ckpt/default_multi/models/model_iter_2-merged
+
+[Step 1/4] Running inference...
+Output: ckpt/default_multi/iteration_2/inference.jsonl
+
+✓ Inference completed
+
+[Step 2/4] Running evaluation...
+Output: ckpt/default_multi/iteration_2/evaluation.jsonl
+
+✓ Evaluation completed
+
+[Step 3/4] Filtering correct examples...
+Output: ckpt/default_multi/iteration_2/correct_examples.jsonl
+
+Number of correct examples: 9957
+✓ Filtering completed
+
+[Step 4/4] Training on correct examples...
+Training data: ckpt/default_multi/iteration_2/correct_examples.jsonl
+New model will be saved to: ckpt/default_multi/models/model_iter_3
+
+
+Using merged LoRA model: ckpt/default_multi/models/model_iter_3-merged
+✓ Training completed
+
+✓ Iteration 2 completed
+
+========================================
+ITERATION 3 / 3
+========================================
+Model: ckpt/default_multi/models/model_iter_3-merged
+
+[Step 1/4] Running inference...
+Output: ckpt/default_multi/iteration_3/inference.jsonl
+
+✓ Inference completed
+
+[Step 2/4] Running evaluation...
+Output: ckpt/default_multi/iteration_3/evaluation.jsonl
+
+✓ Evaluation completed
+
+[Step 3/4] Filtering correct examples...
+Output: ckpt/default_multi/iteration_3/correct_examples.jsonl
+
+Number of correct examples: 10059
+✓ Filtering completed
+
+[Step 4/4] Training on correct examples...
+Training data: ckpt/default_multi/iteration_3/correct_examples.jsonl
+New model will be saved to: ckpt/default_multi/models/model_iter_4
+
+
+Using merged LoRA model: ckpt/default_multi/models/model_iter_4-merged
+✓ Training completed
+
+✓ Iteration 3 completed
+
+========================================
+Self-Training Pipeline Summary
+========================================
+Pipeline Directory: ckpt/default_multi
+Iterations Completed: 4 / 4
+
+Results by iteration:
+  Iteration 0: 9338 correct examples
+  Iteration 1: 9716 correct examples
+  Iteration 2: 9957 correct examples
+  Iteration 3: 10059 correct examples
+
+Logs:
+  - Main log: ckpt/default_multi/logs/pipeline.log
+  - Iteration logs: ckpt/default_multi/iteration_*/iteration.log
+
+✓ All iterations completed successfully!
+✓ Final model saved to: ckpt/default_multi/models/model_iter_4-merged
+
+========================================
+Pipeline finished!
+========================================
