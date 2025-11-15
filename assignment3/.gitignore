@@ -6,6 +6,7 @@ mistral-7b-bnb-4bit
 .hf_cache
 **.aux
 **.out
+hw3.log
 
 ckpt/**/models
 ckpt/**/*.pickle
