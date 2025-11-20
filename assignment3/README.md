@@ -218,10 +218,9 @@ With the default config, the training takes about 5 hours on 2080ti.
 - Training configuration summary (model, iterations, rollouts, LoRA config)
 - Table showing metrics across iterations:
   - Number of correct solutions found
-  - pass@1, pass@4, pass@8 scores
+  - pass@1, pass@4, pass@8 scores on the training set for the initial model. 
   - Training loss
 - Screenshot or plot of accuracy improvement across iterations
-- Analysis: Did self-training improve performance? Why or why not?
 
 **Hints for Improvement**
 
