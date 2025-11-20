@@ -234,8 +234,8 @@ Evaluate your final model and analyze the self-training process.
 **Task Details:**
 - Run evaluation on the GSM8K test set using the script `scripts/run_gsm8k_eval.sh`
 - Compare performance between:
-  1. Base model (iteration 0)
-  2. After iteration 1
+  1. Base model 
+  2. After one iteration of training. 
 
 **Running Evaluation:**
 ```bash
