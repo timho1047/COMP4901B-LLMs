@@ -1,6 +1,6 @@
 # COMP4901B Homework 4 - AIME Math Problem Solver with Python Tool
 
-**Due Date: 2025-12-4 11:59 PM**
+**Due Date: 2025-12-5 11:59 PM**
 
 **Full score: 100 points.**
 
