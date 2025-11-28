@@ -10,4 +10,6 @@ This repository contains assignments for COMP4901B - Large Language Models cours
 
 [Assignment 3](assignment3/README.md)
 
+[Assignment 4](assignment4/README.md)
+
 [Group Project](group-project/README.md)
