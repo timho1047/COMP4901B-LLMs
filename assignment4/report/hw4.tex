@@ -1,0 +1,149 @@
+\documentclass[11pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{CJKutf8}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+
+% Code listing style
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{red},
+    showstringspaces=false,
+    tabsize=4
+}
+
+% Header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{COMP4901B - Large Language Models}
+\rhead{Assignment 4}
+\cfoot{\thepage}
+\setlength{\parindent}{0pt}
+\setlength{\headheight}{14pt}
+\addtolength{\topmargin}{-2pt}
+
+% Title information
+\title{
+    \textbf{COMP4901B: Large Language Models} \\
+    \vspace{0.5em}
+    \Large Assignment 4 Report
+}
+\author{HE, Wenqian \\ Student ID: 20860896}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+\section{Step 1:  Implement the Python Code Execution Tool}
+
+Please see \ref{fig:code_tool_1}, \ref{fig:code_tool_2}, and \ref{fig:code_tool_3} for the implementation of the code execution tool.
+
+The main logic of my implementation is:
+\begin{enumerate}
+    \item Force the agent to print the result using the print() function into stdout.
+    \item Ban the use of sensitive calls like open(), input(), eval(), exec(), compile(), and \_\_import\_\_().
+    \item Ban the import of other modules than the pre-imported modules, using regex to match the import statement.
+    \item Initialize a subprocess of python interpreter using \texttt{uv run python} and run the code in the subprocess, so as to capture stdout and stderr.
+    \item Validation error, stdout, and stderr are put into the response of the tool.
+    \item If the code execution result is empty, return a system reminder to the agent to notify the agent that the result might not be printed correctly, and remind the agent to retry.
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/code_tool_1.png}
+    \caption{Code Execution Tool: \texttt{validate\_code()}}
+    \label{fig:code_tool_1}
+\end{figure}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/code_tool_2.png}
+    \caption{Code Execution Tool: \texttt{execute\_python\_code\_impl()}}
+    \label{fig:code_tool_2}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/code_tool_3.png}
+    \caption{Code Execution Tool: \texttt{execute\_python\_code()}}
+    \label{fig:code_tool_3}
+\end{figure}
+
+\clearpage
+\section{Step 2:  Adapt Your Agent Loop for AIME}
+I used LangGraph to build a typical agent loop as shown in figure \ref{fig:agent_loop}. 
+
+Here are some important details:
+\begin{enumerate}
+    \item I maintained a \texttt{answer} field in the agent state, which is originally set to \texttt{None}. The loop end condition is that the \texttt{answer} field is not \texttt{None}.
+    \item If the agent cannot find the answer within the maximum number of steps, the \texttt{answer} field is set to \texttt{\\boxed{failure}}, and the loop ends.
+    \item If the agent finds the answer, it should call the \texttt{submit\_answer} tool (see \ref{fig:submit_answer_tool}) to submit the answer, which will update the \texttt{answer} field to the answer to meet the end loop condition. To improve the answer extraction, the \texttt{submit\_answer} tool requires the answer to be wrapped in \texttt{\\boxed{}} format, otherwise the tool will return an error and remind the agent to wrap the answer correctly.
+    \item In each step, a system reminder to remind the agent what is the question and it should submit the answer if answer is found is appended at the end of the history of messages to the LLM (see \ref{fig:agent_reminder}). This is to ensure the agent does not forget the question and the answer submission requirement after long reasoning.
+\end{enumerate}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.1\textwidth,keepaspectratio]{images/agent_loop.png}
+    \caption{Agent Loop}\label{fig:agent_loop}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/submit_answer.png}
+    \caption{Submit Answer Tool}
+    \label{fig:submit_answer_tool}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1\textwidth]{images/agent_reminder.png}
+    \caption{Agent Reminder In Each Step}
+    \label{fig:agent_reminder}
+\end{figure}
+
+\clearpage
+\section{Step 3: Evaluate your agent w/ and w/o tool calling}
+
+I evaluated the agent with and without the python code execution tool. Noticed that the \texttt{submit\_answer} tool is used in both settings for final answer collection.
+
+\subsection{Without Tool (Baseline)}
+See figure \ref{fig:eval_nocode} for the evaluation result. The accuracy is 67.50\%, which is the baseline accuracy.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/eval_nocode.png}
+    \caption{Evaluation Result Without Python Code Execution Tool}
+    \label{fig:eval_nocode}
+\end{figure}
+
+\subsection{With Tool Calling}
+See figure \ref{fig:eval_code} for the evaluation result. The accuracy is 76.67\%, which is the accuracy with the python code execution tool.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.7\textwidth]{images/eval_code.png}
+    \caption{Evaluation Result With Python Code Execution Tool}
+    \label{fig:eval_code}
+\end{figure}
+
+\end{document}

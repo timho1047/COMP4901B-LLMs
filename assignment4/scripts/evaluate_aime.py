@@ -140,7 +140,7 @@ def serialize_sympy_object(obj: Any) -> str:
         return f"Error: {str(e)}"
 
 
-def process_answers(data: List[Dict[str, Any]], gold_is_latex: bool) -> tuple:
+def process_answers(data: List[Dict[str, Any]], gold_is_latex: bool ) -> tuple:
     """Process each answer through the sympy extraction workflow and compare with gold using math_verify.
 
     Args:

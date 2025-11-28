@@ -1,0 +1,9 @@
+**.egg-info
+
+.env
+.venv
+
+**.out
+**.aux
+**.log
+
